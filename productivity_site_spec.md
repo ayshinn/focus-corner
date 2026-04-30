@@ -51,13 +51,13 @@ LifeAt feature parity, gamification.
 Theme picker w/ 5 themes. Each has **day** and **night** variant (similar to light/dark).
 Theme controls: backdrop scene, color tokens, font choices, accent, ambient default music.
 
-| Theme        | Day variant                          | Night variant                       |
-|--------------|--------------------------------------|-------------------------------------|
-| Minimal      | Clean light, soft shadows, sans      | Dark gray base, low contrast accent |
-| Cozy Dorm    | Warm beige, lamp lighting, plants    | Dim lamp, string lights, fireplace  |
-| Library      | Sunlit window, wood, parchment       | Candlelit shelves, fireplace        |
-| Central Park | Daylight trees, path, joggers        | Lit lamps, fireflies, soft hum      |
-| Code Terminal| Light terminal, mono fonts, gridlines| Black bg, neon CRT glow, scanlines  |
+| Theme         | Day variant                           | Night variant                       |
+| ------------- | ------------------------------------- | ----------------------------------- |
+| Minimal       | Clean light, soft shadows, sans       | Dark gray base, low contrast accent |
+| Cozy Dorm     | Warm beige, lamp lighting, plants     | Dim lamp, string lights, fireplace  |
+| Library       | Sunlit window, wood, parchment        | Candlelit shelves, fireplace        |
+| Central Park  | Daylight trees, path, joggers         | Lit lamps, fireflies, soft hum      |
+| Code Terminal | Light terminal, mono fonts, gridlines | Black bg, neon CRT glow, scanlines  |
 
 **Backdrops** are static video files (`.mp4`/`.webm`) bundled in repo, OR pure CSS/JS
 animated scenes. No YouTube embeds for backdrops (avoid third-party UI overlays).
@@ -78,6 +78,7 @@ during build. Pexels / Coverr / Pixabay are go-tos for free video.
 ### 5.1 Core (MVP and beyond)
 
 #### Pomodoro Timer
+
 - Default: 25 work / 5 short break / 15 long break (every 4 cycles).
 - All durations user-configurable in settings, persisted localStorage.
 - Manual click to start next interval (no auto-advance).
@@ -91,6 +92,7 @@ during build. Pexels / Coverr / Pixabay are go-tos for free video.
 - Wake Lock API engaged during work intervals (screen stays on).
 
 #### Todo List
+
 - Two columns: **Today**, **Tomorrow**.
 - Drag-and-drop reorder within and between columns.
 - Add via input + Enter. Edit by clicking item. Mark done w/ checkbox.
@@ -102,12 +104,14 @@ during build. Pexels / Coverr / Pixabay are go-tos for free video.
 - Persistence: localStorage. Schema versioned for future migrations.
 
 #### Aesthetic Backdrop
+
 - Bound to selected theme. Day/night variant swaps backdrop accordingly.
 - Static video loop or CSS/JS scene. Muted by default (audio handled separately).
 - User picks theme; backdrop is not independently switchable.
 - Performance: pause backdrop when tab hidden (Page Visibility API).
 
 #### Music Control
+
 - Two modes:
   1. **Default music**: 3 bundled audio tracks (lofi-style, royalty-free).
      Picker UI lets user choose track. Loops by default.
@@ -121,43 +125,48 @@ during build. Pexels / Coverr / Pixabay are go-tos for free video.
 - Hotkeys: space (play/pause), `[` `]` (prev/next), `-` `=` (volume).
 
 #### Clock
+
 - Local time, large, glanceable. 12h/24h toggle. Date below.
 - Single timezone (local). Multi-tz deferred.
 
 #### Current Task Display
+
 - Shows top item of Today todo column.
 - Updates live as todo list changes.
 - Big text, theme-styled. Subtle when no task.
 
 #### Theme Switcher
+
 - Compact UI in sidebar or settings panel: 5 theme cards, each w/ tiny preview.
 - Day/Night toggle separate.
 
 ### 5.2 Nice-to-have (post-MVP, prioritized)
 
-| # | Feature              | Notes                                                        |
-|---|----------------------|--------------------------------------------------------------|
-| 1 | Hotkeys for everything | `?` opens cheatsheet. Cmd-style palette optional later.    |
-| 2 | Session log          | Daily focus minutes. Calendar-grid view. Export CSV.         |
-| 3 | Stats display        | Weekly streak, total focus hrs, sessions completed.          |
-| 4 | Sticky notes         | Free-position drag, persistent. Markdown-lite. Theme-styled. |
-| 5 | Weather widget       | Open-Meteo API (keyless). Geolocation prompt or manual city. |
-| 6 | Quote / intention    | Daily quote from local JSON, OR user types intention each day.|
-| 7 | Habit tracker        | Daily checkboxes, last-30-days dot grid.                     |
+| #   | Feature                | Notes                                                          |
+| --- | ---------------------- | -------------------------------------------------------------- |
+| 1   | Hotkeys for everything | `?` opens cheatsheet. Cmd-style palette optional later.        |
+| 2   | Session log            | Daily focus minutes. Calendar-grid view. Export CSV.           |
+| 3   | Stats display          | Weekly streak, total focus hrs, sessions completed.            |
+| 4   | Sticky notes           | Free-position drag, persistent. Markdown-lite. Theme-styled.   |
+| 5   | Weather widget         | Open-Meteo API (keyless). Geolocation prompt or manual city.   |
+| 6   | Quote / intention      | Daily quote from local JSON, OR user types intention each day. |
+| 7   | Habit tracker          | Daily checkboxes, last-30-days dot grid.                       |
 
 ### 5.3 Integrations
 
 #### Spotify (Premium)
+
 - Auth: Authorization Code w/ PKCE. Redirect URI = site root.
 - Token + refresh token in localStorage. Silent refresh on load.
 - Web Playback SDK loaded after connect. Browser tab becomes a Spotify Connect device.
 - Scopes: `streaming user-read-email user-read-private user-read-playback-state
-  user-modify-playback-state playlist-read-private user-library-read`.
+user-modify-playback-state playlist-read-private user-library-read`.
 - Disconnect button clears tokens.
 - Failure modes: non-Premium account → show "Premium required" message, fall back
   to default music. Allowlist miss → show "Ask Anthony to add you" message.
 
 #### Google Calendar
+
 - Auth: GIS (Google Identity Services) token model.
 - Scope: `https://www.googleapis.com/auth/calendar.readonly`.
 - Read-only. Today view default. Toggle to week view if implementation simple.
@@ -200,19 +209,19 @@ are user-sizable. Defer to design pass before coding.
 
 ## 7. Tech Stack (recommendations, all overridable)
 
-| Concern        | Pick                              | Reason                                     |
-|----------------|-----------------------------------|--------------------------------------------|
-| Build          | Vite                              | Matches nonogram repo. Fast HMR.           |
-| Language       | TypeScript                        | Strict mode + noUncheckedIndexedAccess.    |
-| Framework      | None (vanilla TS) OR Solid        | Vanilla matches your style; Solid if reactivity grows hairy. |
-| CSS            | Hand-written + CSS custom props   | Theme tokens fit naturally; no Tailwind tax. |
-| Tests          | Vitest                            | Already known.                             |
-| Drag/drop      | Vanilla Pointer Events            | Light, no dep.                             |
-| Markdown       | `marked` (if sticky notes need it) | Tiny, no dep tree.                        |
-| Icons          | Lucide via inline SVG sprite      | Free, consistent.                          |
-| Audio          | HTML5 `<audio>` + Web Audio API   | Mix layers if ambient mixer added.         |
-| Spotify        | Web Playback SDK + manual PKCE    | No SDK helper needed.                      |
-| Google         | `@googleapis/calendar` types only + raw fetch | Avoid heavy `gapi` client.       |
+| Concern   | Pick                                          | Reason                                                       |
+| --------- | --------------------------------------------- | ------------------------------------------------------------ |
+| Build     | Vite                                          | Matches nonogram repo. Fast HMR.                             |
+| Language  | TypeScript                                    | Strict mode + noUncheckedIndexedAccess.                      |
+| Framework | None (vanilla TS) OR Solid                    | Vanilla matches your style; Solid if reactivity grows hairy. |
+| CSS       | Hand-written + CSS custom props               | Theme tokens fit naturally; no Tailwind tax.                 |
+| Tests     | Vitest                                        | Already known.                                               |
+| Drag/drop | Vanilla Pointer Events                        | Light, no dep.                                               |
+| Markdown  | `marked` (if sticky notes need it)            | Tiny, no dep tree.                                           |
+| Icons     | Lucide via inline SVG sprite                  | Free, consistent.                                            |
+| Audio     | HTML5 `<audio>` + Web Audio API               | Mix layers if ambient mixer added.                           |
+| Spotify   | Web Playback SDK + manual PKCE                | No SDK helper needed.                                        |
+| Google    | `@googleapis/calendar` types only + raw fetch | Avoid heavy `gapi` client.                                   |
 
 **PWA**: deferred. Add service worker + manifest after MVP stable.
 **Offline**: deferred. App has too much network-dependent state to bother early.
@@ -246,6 +255,7 @@ keyed by version delta.
 ## 9. Phasing
 
 ### MVP — ship first
+
 1. Skeleton: Vite + TS scaffold, layout, sidebar, theme system bones.
 2. **Minimal theme** day + night only.
 3. **Pomodoro timer** (full feature set incl. tab title, sound, notification).
@@ -256,18 +266,21 @@ keyed by version delta.
 Goal: I use it daily on my own laptop within ~1 week of focused build.
 
 ### Phase 2 — aesthetic + audio
+
 7. Add 4 remaining themes (Cozy Dorm, Library, Central Park, Code Terminal).
 8. Backdrop video/scene per theme.
 9. Default music player (3 bundled tracks).
 10. Volume + track picker UI.
 
 ### Phase 3 — integrations
+
 11. Spotify connect + custom playback UI.
 12. Spotify playlist browse / search / queue.
 13. Google Calendar connect + today view.
 14. Calendar event detail panel + week view toggle.
 
 ### Phase 4 — polish & extras
+
 15. Hotkeys + cheatsheet.
 16. Session log widget + stats.
 17. Sticky notes (drag-position).
@@ -277,6 +290,7 @@ Goal: I use it daily on my own laptop within ~1 week of focused build.
 21. Export/import JSON.
 
 ### Phase 5 — speculative
+
 - Gist-based sync.
 - Custom backdrop upload.
 - Theme creator / sharing.
@@ -299,16 +313,16 @@ Goal: I use it daily on my own laptop within ~1 week of focused build.
 
 ## 11. Risks & Mitigations
 
-| Risk                                    | Mitigation                                  |
-|-----------------------------------------|---------------------------------------------|
-| Spotify token expiry mid-session        | Refresh proactively at 80% of TTL.          |
-| Google quota burn from polling          | Poll calendar every 5min, not every render. |
-| Backdrop video weight bloats repo       | Use `webm` w/ VP9, target <5MB per theme.   |
-| Theme CSS scope leaks                   | CSS custom props on `<html>` data attribute. |
-| Tab inactivity drains audio/video       | Pause on `visibilitychange`, resume on focus. |
-| User loses tokens on cache clear        | Document in help; offer reconnect flow.     |
-| Browser denies Notification permission  | Fall back to in-page toast.                 |
-| Wake Lock unsupported (Firefox stable)  | Feature-detect, hide checkbox if absent.    |
+| Risk                                   | Mitigation                                    |
+| -------------------------------------- | --------------------------------------------- |
+| Spotify token expiry mid-session       | Refresh proactively at 80% of TTL.            |
+| Google quota burn from polling         | Poll calendar every 5min, not every render.   |
+| Backdrop video weight bloats repo      | Use `webm` w/ VP9, target <5MB per theme.     |
+| Theme CSS scope leaks                  | CSS custom props on `<html>` data attribute.  |
+| Tab inactivity drains audio/video      | Pause on `visibilitychange`, resume on focus. |
+| User loses tokens on cache clear       | Document in help; offer reconnect flow.       |
+| Browser denies Notification permission | Fall back to in-page toast.                   |
+| Wake Lock unsupported (Firefox stable) | Feature-detect, hide checkbox if absent.      |
 
 ---
 

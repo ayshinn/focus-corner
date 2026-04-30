@@ -3,6 +3,7 @@
 > Each step = one commit. Steps build forward; nothing in a later step undoes earlier work. Logic-only Vitest in early steps; DOM/integration tests added later. Commit messages should reference the step number for traceability.
 
 Locked decisions that shape this plan (from clarifying Q&A 2026-04-29):
+
 - Framework: vanilla TS (no Solid unless reactivity proves painful — switch is its own future commit).
 - Tooling: Prettier + ESLint from the start.
 - Deploy: GitHub Pages from `main` via Actions, no `gh-pages` branch.
