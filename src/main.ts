@@ -8,6 +8,7 @@ import { mountBackdrop } from './backdrop';
 import { mountClock } from './clock';
 import { mountCurrentTask } from './current-task';
 import { mountPomodoro } from './pomodoro';
+import { mountTodo } from './todo';
 
 registerTheme(minimal);
 bootstrapTheme();
@@ -19,6 +20,7 @@ const clockSlot = document.querySelector<HTMLElement>('[data-slot="clock"]');
 const currentTaskSlot = document.querySelector<HTMLElement>('[data-slot="current-task"]');
 const settingsSlot = document.querySelector<HTMLElement>('[data-slot="settings"]');
 const pomodoroSlot = document.querySelector<HTMLElement>('[data-slot="pomodoro"]');
+const todoSlot = document.querySelector<HTMLElement>('[data-slot="todo"]');
 if (
   !sidebar ||
   !drawer ||
@@ -26,7 +28,8 @@ if (
   !clockSlot ||
   !currentTaskSlot ||
   !settingsSlot ||
-  !pomodoroSlot
+  !pomodoroSlot ||
+  !todoSlot
 ) {
   throw new Error('shell missing');
 }
@@ -38,3 +41,4 @@ mountSettingsControls(settingsSlot);
 mountClock(clockSlot);
 mountCurrentTask(currentTaskSlot);
 mountPomodoro(pomodoroSlot);
+mountTodo(todoSlot);

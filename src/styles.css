@@ -448,6 +448,133 @@ h3 {
   font-variant-numeric: tabular-nums;
 }
 
+/* ---------- Todo ---------- */
+.floating-widget-todo {
+  top: 32px;
+  left: 32px;
+  width: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.todo-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.todo-column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 180px;
+}
+
+.todo-column-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.todo-column-header h3 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fg-muted);
+}
+
+.todo-count {
+  font-size: 11px;
+  color: var(--fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.todo-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 24px;
+}
+
+.todo-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--fg);
+}
+
+.todo-item:hover {
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+.todo-item[data-done='true'] .todo-text {
+  text-decoration: line-through;
+  color: var(--fg-muted);
+  opacity: 0.7;
+}
+
+.todo-check {
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.todo-check input {
+  margin: 0;
+  width: 14px;
+  height: 14px;
+  accent-color: var(--accent);
+}
+
+.todo-text {
+  flex: 1;
+  cursor: text;
+  word-break: break-word;
+  outline: none;
+  padding: 1px 2px;
+  border-radius: 3px;
+}
+
+.todo-edit-input {
+  flex: 1;
+  font: inherit;
+  font-size: 13px;
+  padding: 1px 4px;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--fg);
+}
+
+.todo-add input {
+  width: 100%;
+  padding: 6px 8px;
+  font: inherit;
+  font-size: 13px;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg);
+}
+
+.todo-add input::placeholder {
+  color: var(--fg-muted);
+  opacity: 0.7;
+}
+
+.todo-add input:focus {
+  border-style: solid;
+  border-color: var(--accent);
+}
+
 /* ---------- Toast ---------- */
 .toast-container {
   position: fixed;
