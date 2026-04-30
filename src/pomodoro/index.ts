@@ -3,6 +3,9 @@
 // sync with the live timer.
 
 import { getSettings, subscribeSettings, type PomodoroDurationsMin } from '../storage/settings';
+import { playIntervalEndChime } from '../audio/beep';
+import { ensureNotificationPermission, notify } from '../ui/notify';
+import { acquireWakeLock, releaseWakeLock } from './wake-lock';
 import {
   createPomodoro,
   formatRemaining,
@@ -43,9 +46,26 @@ export function getPomodoroStore(): PomodoroStore | null {
   return store;
 }
 
+function intervalEndMessage(phase: Exclude<Phase, 'idle'>): string {
+  switch (phase) {
+    case 'work':
+      return 'Work session complete. Time for a break.';
+    case 'short_break':
+      return 'Short break done. Back to work?';
+    case 'long_break':
+      return 'Long break done. Back to work?';
+  }
+}
+
 export function mountPomodoro(target: HTMLElement): PomodoroStore {
   const initialDurations = toDurations(getSettings().pomodoroDurationsMin);
-  const pomodoro = createPomodoro(initialDurations);
+  const pomodoro = createPomodoro(initialDurations, {
+    onIntervalEnd: (phase) => {
+      playIntervalEndChime();
+      notify(`${phaseLabel(phase)} complete`, { body: intervalEndMessage(phase) });
+      void releaseWakeLock();
+    },
+  });
   store = pomodoro;
 
   target.classList.add('pomodoro-card');
@@ -93,11 +113,25 @@ export function mountPomodoro(target: HTMLElement): PomodoroStore {
   render(pomodoro.getState());
 
   primaryBtn.addEventListener('click', () => {
-    const st = pomodoro.getState();
-    if (st.running) pomodoro.pause();
-    else pomodoro.start();
+    const before = pomodoro.getState();
+    if (before.running) {
+      pomodoro.pause();
+    } else {
+      void ensureNotificationPermission();
+      pomodoro.start();
+    }
+    syncWakeLock();
   });
-  skipBtn.addEventListener('click', () => pomodoro.skip());
+  skipBtn.addEventListener('click', () => {
+    pomodoro.skip();
+    syncWakeLock();
+  });
+
+  function syncWakeLock(): void {
+    const st = pomodoro.getState();
+    if (st.phase === 'work' && st.running) void acquireWakeLock();
+    else void releaseWakeLock();
+  }
 
   // Real-time ticker. RAF when visible, setInterval fallback when hidden so
   // the FSM keeps progressing in background tabs (browser throttles RAF).

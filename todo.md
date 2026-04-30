@@ -22,7 +22,7 @@ Progress tracker for focus-corner. Steps come from `implementation_steps.md`. Ma
 - [x] 13. Minimal backdrop scene
 - [x] 14. Clock + Current Task placeholder
 - [x] 15. Pomodoro core (state machine, durations, UI shell, tab title)
-- [ ] 16. Pomodoro feedback (beep, notification + toast, Wake Lock)
+- [x] 16. Pomodoro feedback (beep, notification + toast, Wake Lock)
 - [ ] 17. Session log writes (IndexedDB)
 - [ ] 18. Todo logic + persistence
 - [ ] 19. Todo basic UI (render, add, done, edit, current task wiring)
