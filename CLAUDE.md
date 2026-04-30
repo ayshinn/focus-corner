@@ -50,3 +50,19 @@ Work is sprint-shaped: don't start phase N+1 until N is stable enough to use dai
 
 - Progress tracked in a `todo.md` companion file (mirrors the author's nonogram-solver repo pattern). Keep it current.
 - The spec is living: when an open question (`§10`) gets resolved or a TBD gets locked in, update `productivity_site_spec.md` rather than letting decisions drift into code-only knowledge.
+
+## Step-driven workflow
+
+Implementation is broken into numbered steps in `implementation_steps.md`. Each step = one commit; later steps never undo earlier work. `todo.md` mirrors the same numbering with checkboxes for progress.
+
+When the user says **"do step N"** or **"do steps X–Y"** (without further explanation), follow this loop:
+
+1. Read `implementation_steps.md` for the scope of each requested step (and the locked decisions at the top, which override defaults).
+2. Read `todo.md` to confirm the steps aren't already done and to see prior follow-ups.
+3. For each step in order:
+   - Implement only what that step covers — do not pull work forward from later steps.
+   - Run `npm test`, `npm run lint`, and `npx tsc --noEmit` (or `npm run build`) before committing. All must pass.
+   - Tick the step's checkbox in `todo.md`.
+   - `git commit` with a message of the form `Step N: <short title>` and a body summarizing what landed. One commit per step.
+4. If a step's scope balloons mid-implementation, split it (`15a` / `15b`) rather than letting the commit grow — see the bottom of `implementation_steps.md`.
+5. If a spec §10 open question gets resolved while implementing a step, update `productivity_site_spec.md` in the same commit.
