@@ -6,7 +6,25 @@
     <title>focus-corner</title>
   </head>
   <body>
-    <h1>focus-corner</h1>
+    <div id="app">
+      <aside class="sidebar" aria-label="Sidebar"></aside>
+      <main class="main">
+        <header class="topbar">
+          <div class="topbar-current-task" data-slot="current-task">No task</div>
+          <div class="topbar-clock" data-slot="clock"></div>
+        </header>
+        <section class="stage" data-slot="stage"></section>
+      </main>
+      <aside class="settings-drawer" aria-label="Settings" data-open="false">
+        <header class="settings-drawer-header">
+          <h2>Settings</h2>
+          <button type="button" class="settings-drawer-close" data-action="close-settings">
+            Close
+          </button>
+        </header>
+        <div class="settings-drawer-body" data-slot="settings"></div>
+      </aside>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
