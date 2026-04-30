@@ -6,6 +6,7 @@ import { getSettings, subscribeSettings, type PomodoroDurationsMin } from '../st
 import { playIntervalEndChime } from '../audio/beep';
 import { ensureNotificationPermission, notify } from '../ui/notify';
 import { acquireWakeLock, releaseWakeLock } from './wake-lock';
+import { appendSession } from './session-log';
 import {
   createPomodoro,
   formatRemaining,
@@ -59,14 +60,40 @@ function intervalEndMessage(phase: Exclude<Phase, 'idle'>): string {
 
 export function mountPomodoro(target: HTMLElement): PomodoroStore {
   const initialDurations = toDurations(getSettings().pomodoroDurationsMin);
+
+  // Track when the current work interval began (wall-clock) so completed
+  // sessions can be persisted with both startedAt and endedAt.
+  let workStartedAt: number | null = null;
+
   const pomodoro = createPomodoro(initialDurations, {
     onIntervalEnd: (phase) => {
       playIntervalEndChime();
       notify(`${phaseLabel(phase)} complete`, { body: intervalEndMessage(phase) });
       void releaseWakeLock();
+      if (phase === 'work' && workStartedAt !== null) {
+        const endedAt = Date.now();
+        const durationMs = toDurations(getSettings().pomodoroDurationsMin).workMs;
+        void appendSession({ startedAt: workStartedAt, endedAt, durationMs, kind: 'work' });
+        workStartedAt = null;
+      }
     },
   });
   store = pomodoro;
+
+  // Phase-transition observer: stamp workStartedAt when entering work, clear
+  // when leaving without natural completion (skip from work, reset).
+  let prevPhase: Phase = pomodoro.getState().phase;
+  pomodoro.subscribe((state) => {
+    if (state.phase !== prevPhase) {
+      if (state.phase === 'work' && state.remainingMs > 0) {
+        workStartedAt = Date.now();
+      } else if (prevPhase === 'work') {
+        // Left work without natural completion — drop the unfinished session.
+        workStartedAt = null;
+      }
+      prevPhase = state.phase;
+    }
+  });
 
   target.classList.add('pomodoro-card');
   target.innerHTML = `
