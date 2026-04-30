@@ -49,6 +49,20 @@ export function mountSettingsControls(target: HTMLElement): void {
         </div>`,
       ).join('')}
     </section>
+    <section class="settings-section">
+      <h3>Todo</h3>
+      <div class="settings-row">
+        <span class="settings-label">Clear done after (hours)</span>
+        <input
+          class="settings-number"
+          type="number"
+          min="1"
+          max="720"
+          step="1"
+          data-todo-clear="hours"
+        />
+      </div>
+    </section>
   `;
 
   const segmented = target.querySelector<HTMLElement>('[data-slot="clock-format"]');
@@ -71,6 +85,12 @@ export function mountSettingsControls(target: HTMLElement): void {
     });
   });
 
+  const todoClearInput = target.querySelector<HTMLInputElement>('[data-todo-clear="hours"]');
+  todoClearInput?.addEventListener('change', () => {
+    const next = clamp(todoClearInput.valueAsNumber, 1, 720);
+    updateSettings({ todoDoneClearAfterHours: next });
+  });
+
   const sync = (): void => {
     const settings = getSettings();
     target.querySelectorAll<HTMLElement>('[data-value]').forEach((el) => {
@@ -80,6 +100,9 @@ export function mountSettingsControls(target: HTMLElement): void {
       const key = input.dataset.duration as DurationKey;
       input.value = String(settings.pomodoroDurationsMin[key]);
     });
+    if (todoClearInput) {
+      todoClearInput.value = String(settings.todoDoneClearAfterHours);
+    }
   };
 
   sync();

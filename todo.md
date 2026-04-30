@@ -26,7 +26,7 @@ Progress tracker for focus-corner. Steps come from `implementation_steps.md`. Ma
 - [x] 17. Session log writes (IndexedDB)
 - [x] 18. Todo logic + persistence
 - [x] 19. Todo basic UI (render, add, done, edit, current task wiring)
-- [ ] 20. Todo time + drag (auto-clear, midnight roll, drag within + between)
+- [x] 20. Todo time + drag (auto-clear, midnight roll, drag within + between)
 - [ ] 21. MVP smoke pass + bug commit
 
 ## Phase 2 — Themes + default music

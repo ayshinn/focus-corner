@@ -575,6 +575,43 @@ h3 {
   border-color: var(--accent);
 }
 
+.todo-item {
+  touch-action: none;
+  user-select: none;
+}
+
+.todo-item-dragging {
+  opacity: 0.35;
+}
+
+.todo-item-ghost {
+  background: color-mix(in srgb, var(--surface-elevated) 96%, transparent);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  box-shadow: 0 16px 36px -12px color-mix(in srgb, var(--fg) 30%, transparent);
+  padding: 6px 8px;
+  font-size: 13px;
+  color: var(--fg);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.todo-drop-before {
+  box-shadow: 0 -2px 0 0 var(--accent);
+}
+
+.todo-drop-after {
+  box-shadow: 0 2px 0 0 var(--accent);
+}
+
+.todo-list-empty-drop {
+  outline: 1px dashed var(--accent);
+  outline-offset: -2px;
+  border-radius: 6px;
+}
+
 /* ---------- Toast ---------- */
 .toast-container {
   position: fixed;

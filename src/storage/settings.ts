@@ -15,10 +15,11 @@ export interface PomodoroDurationsMin {
 export interface Settings {
   clockFormat: ClockFormat;
   pomodoroDurationsMin: PomodoroDurationsMin;
+  todoDoneClearAfterHours: number;
 }
 
 const KEY = 'settings';
-const VERSION = 2;
+const VERSION = 3;
 
 const DEFAULT_POMODORO: PomodoroDurationsMin = {
   work: 25,
@@ -26,15 +27,22 @@ const DEFAULT_POMODORO: PomodoroDurationsMin = {
   longBreak: 15,
 };
 
+const DEFAULT_TODO_DONE_CLEAR_HOURS = 24;
+
 const DEFAULTS: Settings = {
   clockFormat: '12h',
   pomodoroDurationsMin: { ...DEFAULT_POMODORO },
+  todoDoneClearAfterHours: DEFAULT_TODO_DONE_CLEAR_HOURS,
 };
 
 const MIGRATIONS: MigrationMap = {
   1: (prev) => ({
     ...(prev as Record<string, unknown>),
     pomodoroDurationsMin: { ...DEFAULT_POMODORO },
+  }),
+  2: (prev) => ({
+    ...(prev as Record<string, unknown>),
+    todoDoneClearAfterHours: DEFAULT_TODO_DONE_CLEAR_HOURS,
   }),
 };
 
@@ -48,6 +56,10 @@ function normalize(stored: Partial<Settings>): Settings {
       ...DEFAULT_POMODORO,
       ...(stored.pomodoroDurationsMin ?? {}),
     },
+    todoDoneClearAfterHours:
+      typeof stored.todoDoneClearAfterHours === 'number' && stored.todoDoneClearAfterHours > 0
+        ? stored.todoDoneClearAfterHours
+        : DEFAULT_TODO_DONE_CLEAR_HOURS,
   };
 }
 
