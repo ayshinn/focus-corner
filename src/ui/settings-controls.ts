@@ -5,6 +5,19 @@ const CLOCK_OPTIONS: Array<{ value: ClockFormat; label: string }> = [
   { value: '24h', label: '24-hour' },
 ];
 
+type DurationKey = 'work' | 'shortBreak' | 'longBreak';
+
+const DURATION_FIELDS: Array<{ key: DurationKey; label: string; min: number; max: number }> = [
+  { key: 'work', label: 'Work', min: 1, max: 180 },
+  { key: 'shortBreak', label: 'Short break', min: 1, max: 60 },
+  { key: 'longBreak', label: 'Long break', min: 1, max: 120 },
+];
+
+function clamp(n: number, min: number, max: number): number {
+  if (Number.isNaN(n)) return min;
+  return Math.min(max, Math.max(min, Math.floor(n)));
+}
+
 export function mountSettingsControls(target: HTMLElement): void {
   target.innerHTML = `
     <section class="settings-section">
@@ -19,6 +32,23 @@ export function mountSettingsControls(target: HTMLElement): void {
         </div>
       </div>
     </section>
+    <section class="settings-section">
+      <h3>Pomodoro durations (minutes)</h3>
+      ${DURATION_FIELDS.map(
+        (f) => `
+        <div class="settings-row">
+          <span class="settings-label">${f.label}</span>
+          <input
+            class="settings-number"
+            type="number"
+            min="${f.min}"
+            max="${f.max}"
+            step="1"
+            data-duration="${f.key}"
+          />
+        </div>`,
+      ).join('')}
+    </section>
   `;
 
   const segmented = target.querySelector<HTMLElement>('[data-slot="clock-format"]');
@@ -28,10 +58,27 @@ export function mountSettingsControls(target: HTMLElement): void {
     if (value) updateSettings({ clockFormat: value });
   });
 
+  target.querySelectorAll<HTMLInputElement>('[data-duration]').forEach((input) => {
+    input.addEventListener('change', () => {
+      const key = input.dataset.duration as DurationKey;
+      const field = DURATION_FIELDS.find((f) => f.key === key);
+      if (!field) return;
+      const next = clamp(input.valueAsNumber, field.min, field.max);
+      const current = getSettings().pomodoroDurationsMin;
+      updateSettings({
+        pomodoroDurationsMin: { ...current, [key]: next },
+      });
+    });
+  });
+
   const sync = (): void => {
-    const { clockFormat } = getSettings();
+    const settings = getSettings();
     target.querySelectorAll<HTMLElement>('[data-value]').forEach((el) => {
-      el.setAttribute('aria-pressed', String(el.dataset.value === clockFormat));
+      el.setAttribute('aria-pressed', String(el.dataset.value === settings.clockFormat));
+    });
+    target.querySelectorAll<HTMLInputElement>('[data-duration]').forEach((input) => {
+      const key = input.dataset.duration as DurationKey;
+      input.value = String(settings.pomodoroDurationsMin[key]);
     });
   };
 

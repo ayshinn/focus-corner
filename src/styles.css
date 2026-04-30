@@ -351,6 +351,103 @@ h3 {
   color: var(--accent-fg);
 }
 
+/* ---------- Floating widgets ---------- */
+.floating-widget {
+  position: absolute;
+  background: color-mix(in srgb, var(--surface-elevated) 92%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 12px 40px -16px color-mix(in srgb, var(--fg) 24%, transparent);
+  backdrop-filter: blur(8px);
+  padding: 18px 20px;
+  z-index: 1;
+}
+
+.floating-widget-pomodoro {
+  top: 32px;
+  right: 32px;
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pomodoro-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fg-muted);
+}
+
+.pomodoro-phase {
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.floating-widget-pomodoro[data-phase='work'] .pomodoro-phase {
+  color: var(--accent);
+}
+
+.pomodoro-time {
+  font-family: var(--font-mono);
+  font-size: 56px;
+  line-height: 1;
+  color: var(--fg);
+  text-align: center;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.floating-widget-pomodoro[data-running='true'] .pomodoro-time {
+  color: var(--accent);
+}
+
+.pomodoro-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.pomodoro-btn {
+  flex: 1;
+  padding: 9px 12px;
+  font-size: 13px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--fg);
+  transition: background 80ms ease;
+}
+
+.pomodoro-btn:hover {
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+}
+
+.pomodoro-btn-primary {
+  background: var(--accent);
+  color: var(--accent-fg);
+  border-color: var(--accent);
+}
+
+.pomodoro-btn-primary:hover {
+  background: color-mix(in srgb, var(--accent) 88%, var(--fg));
+}
+
+.settings-number {
+  width: 64px;
+  padding: 4px 8px;
+  font: inherit;
+  font-size: 13px;
+  text-align: right;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+}
+
 /* ---------- Clock ---------- */
 .clock-time {
   font-family: var(--font-mono);
