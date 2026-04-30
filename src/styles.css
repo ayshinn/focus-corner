@@ -70,9 +70,12 @@ h3 {
   position: relative;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .topbar {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -102,7 +105,87 @@ h3 {
 .stage {
   flex: 1;
   position: relative;
+  z-index: 1;
   padding: 24px;
+}
+
+/* ---------- Backdrop ---------- */
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+[data-theme='minimal'] .backdrop::before,
+[data-theme='minimal'] .backdrop::after {
+  content: '';
+  position: absolute;
+  inset: -30%;
+  background:
+    radial-gradient(
+      circle at 25% 30%,
+      color-mix(in srgb, var(--accent) 22%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at 75% 70%,
+      color-mix(in srgb, var(--accent) 14%, transparent),
+      transparent 60%
+    );
+  filter: blur(60px);
+  animation: minimal-drift 80s linear infinite;
+  will-change: transform;
+}
+
+[data-theme='minimal'] .backdrop::after {
+  inset: -25%;
+  background:
+    radial-gradient(
+      circle at 60% 20%,
+      color-mix(in srgb, var(--fg) 6%, transparent),
+      transparent 55%
+    );
+  animation-duration: 120s;
+  animation-direction: reverse;
+}
+
+[data-theme='minimal'][data-variant='night'] .backdrop::before {
+  opacity: 0.85;
+}
+
+[data-theme='minimal'][data-variant='night'] .backdrop::after {
+  background:
+    radial-gradient(
+      circle at 60% 20%,
+      color-mix(in srgb, var(--accent) 10%, transparent),
+      transparent 55%
+    );
+}
+
+@keyframes minimal-drift {
+  from {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.06);
+  }
+  to {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+.backdrop[data-paused='true']::before,
+.backdrop[data-paused='true']::after {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop::before,
+  .backdrop::after {
+    animation: none !important;
+  }
 }
 
 /* ---------- Sidebar bits ---------- */
