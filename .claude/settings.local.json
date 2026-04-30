@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /Users/ayshinn/Development/focus-corner log --oneline -20)"
+    ]
+  }
+}
