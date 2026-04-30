@@ -300,3 +300,65 @@ h3 {
   overflow-y: auto;
   flex: 1;
 }
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.settings-section h3 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fg-muted);
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.settings-label {
+  font-size: 13px;
+  color: var(--fg);
+}
+
+.settings-segmented {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.settings-segmented button {
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--fg-muted);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+}
+
+.settings-segmented button:last-child {
+  border-right: 0;
+}
+
+.settings-segmented button[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--accent-fg);
+}
+
+/* ---------- Clock ---------- */
+.clock-time {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  color: var(--fg);
+}
+
+.clock-date {
+  margin-left: 6px;
+  color: var(--fg-muted);
+}
