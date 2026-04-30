@@ -17,7 +17,7 @@ Progress tracker for focus-corner. Steps come from `implementation_steps.md`. Ma
 ## Phase 1 — MVP foundations + features
 
 - [x] 10. Storage foundation (versioned helper + settings store)
-- [ ] 11. Theme system (tokens, registry, Minimal, persistence, prefers-color-scheme)
+- [x] 11. Theme system (tokens, registry, Minimal, persistence, prefers-color-scheme)
 - [ ] 12. App shell + sidebar stubs (theme picker, day/night toggle, settings gear)
 - [ ] 13. Minimal backdrop scene
 - [ ] 14. Clock + Current Task placeholder

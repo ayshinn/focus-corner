@@ -1,2 +1,5 @@
-// focus-corner entry. Real wiring lands in later steps.
-console.info('focus-corner');
+import { bootstrapTheme, registerTheme } from './theme';
+import { minimal } from './theme/themes/minimal';
+
+registerTheme(minimal);
+bootstrapTheme();
