@@ -34,6 +34,14 @@ export interface Theme {
   day: TokenValues;
   night: TokenValues;
   backdrop?: BackdropConfig;
+  // Track id (from public/audio/manifest.json) to suggest when this
+  // theme is first activated. Only loads when no track is currently
+  // selected — user picks always stick.
+  defaultTrackId?: string;
+  // Optional theme-matched interval-end chime. Resolves against
+  // `public/themes/<id>/`; falls back to the oscillator beep if the
+  // file is missing or fails to play.
+  chimeSrc?: string;
 }
 
 export type ThemeVariant = 'day' | 'night' | 'auto';

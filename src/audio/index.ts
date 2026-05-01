@@ -5,6 +5,7 @@
 // explicit click (browser policy).
 
 import { read, write, type MigrationMap } from '../storage/versioned';
+import { getPref, getTheme, subscribe as subscribeTheme } from '../theme';
 import { createAudioEngine, type AudioEngine, type MusicState } from './engine';
 import { loadManifest, type Track } from './manifest';
 
@@ -155,11 +156,41 @@ export function mountMusic(target: HTMLElement): AudioEngine {
     renderTracks(tracks);
     if (persisted.trackId && tracks.some((t) => t.id === persisted.trackId)) {
       engine.load(persisted.trackId);
+    } else {
+      maybeApplyThemeDefault(engine);
     }
     render(engine.getState());
   });
 
+  // Theme changes can suggest a default track when the user hasn't
+  // picked one. We never override a user pick — `maybeApplyThemeDefault`
+  // bails if `trackId` is non-null.
+  subscribeTheme(() => maybeApplyThemeDefault(engine));
+
+  // Page Visibility: pause music when the tab hides, resume on focus
+  // only if it was playing before. Settings/UI dispatches that change
+  // `playing` independently keep the flag honest.
+  let wasPlayingBeforeHide = false;
+  document.addEventListener('visibilitychange', () => {
+    const state = engine.getState();
+    if (document.hidden) {
+      wasPlayingBeforeHide = state.playing;
+      if (state.playing) engine.pause();
+    } else if (wasPlayingBeforeHide) {
+      wasPlayingBeforeHide = false;
+      void engine.play();
+    }
+  });
+
   return engine;
+}
+
+function maybeApplyThemeDefault(engine: AudioEngine): void {
+  const theme = getTheme(getPref().themeId);
+  if (!theme?.defaultTrackId) return;
+  if (engine.getState().trackId !== null) return;
+  if (!engine.getTracks().some((t) => t.id === theme.defaultTrackId)) return;
+  engine.load(theme.defaultTrackId);
 }
 
 function escapeHtml(text: string): string {

@@ -1,6 +1,8 @@
-// Placeholder interval-end chime. Web Audio oscillator so the MVP has
-// audible feedback without bundling assets. Phase 2 swaps this out for
-// theme-matched sample chimes (see step 28).
+// Interval-end chime. If the active theme declares a `chimeSrc`, that
+// sample plays; otherwise (or on load/play failure) we fall back to the
+// Web Audio oscillator beep so the MVP always has audible feedback.
+
+import { getPref, getTheme } from '../theme';
 
 let ctx: AudioContext | null = null;
 
@@ -53,10 +55,37 @@ export async function beep(options: BeepOptions = {}): Promise<void> {
   osc.stop(now + durationMs / 1000 + 0.05);
 }
 
-export function playIntervalEndChime(): void {
+function playOscillatorChime(): void {
   // Two-note chord-ish blip: high then a perfect fourth above ~150ms later.
   void beep({ frequency: 880, durationMs: 320 });
   window.setTimeout(() => {
     void beep({ frequency: 1175, durationMs: 360 });
   }, 160);
+}
+
+function playSample(src: string, volume = 0.5): Promise<boolean> {
+  return new Promise((resolve) => {
+    const a = new Audio(src);
+    a.volume = volume;
+    let settled = false;
+    const finish = (ok: boolean): void => {
+      if (settled) return;
+      settled = true;
+      resolve(ok);
+    };
+    a.addEventListener('error', () => finish(false), { once: true });
+    a.play().then(() => finish(true)).catch(() => finish(false));
+  });
+}
+
+export function playIntervalEndChime(): void {
+  const theme = getTheme(getPref().themeId);
+  const src = theme?.chimeSrc;
+  if (!src) {
+    playOscillatorChime();
+    return;
+  }
+  void playSample(src).then((ok) => {
+    if (!ok) playOscillatorChime();
+  });
 }
