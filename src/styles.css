@@ -189,6 +189,41 @@ h3 {
   }
 }
 
+/* ---- Cozy Dorm fallback scene (renders below the video; visible if the
+   asset is missing or fails to load) ---- */
+[data-theme='cozy-dorm'] .backdrop::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse at 70% 30%,
+      color-mix(in srgb, var(--accent) 22%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 20% 80%,
+      color-mix(in srgb, var(--accent) 12%, transparent),
+      transparent 55%
+    ),
+    linear-gradient(180deg, var(--bg), color-mix(in srgb, var(--bg) 86%, var(--accent) 14%));
+}
+
+[data-theme='cozy-dorm'][data-variant='night'] .backdrop::before {
+  background:
+    radial-gradient(
+      circle at 25% 70%,
+      color-mix(in srgb, var(--accent) 36%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at 80% 20%,
+      color-mix(in srgb, var(--accent) 18%, transparent),
+      transparent 50%
+    ),
+    linear-gradient(180deg, var(--bg), #0d0a07);
+}
+
 .backdrop[data-paused='true']::before,
 .backdrop[data-paused='true']::after {
   animation-play-state: paused;

@@ -32,7 +32,7 @@ Progress tracker for focus-corner. Steps come from `implementation_steps.md`. Ma
 ## Phase 2 — Themes + default music
 
 - [x] 22. Backdrop video infrastructure + asset budget guardrail
-- [ ] 23. Cozy Dorm theme (day + night)
+- [x] 23. Cozy Dorm theme (day + night)
 - [ ] 24. Library theme (day + night)
 - [ ] 25. Central Park theme (day + night)
 - [ ] 26. Code Terminal theme (day + night)
