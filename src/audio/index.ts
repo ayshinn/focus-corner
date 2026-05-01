@@ -1,203 +1,71 @@
-// Music floating card. Wires the audio engine to a small UI: track
-// picker, play/pause, loop toggle, volume slider. State (trackId,
-// volume, loop) persists via the versioned helper so reloads restore
-// the user's last choice — but autoplay is never resumed without an
-// explicit click (browser policy).
+// Music slot coordinator. Owns the floating music card and swaps the
+// default <audio> player UI for the Spotify Web Playback UI when the
+// user is connected. Spec §5.4: Spotify takes precedence when active;
+// non-Premium / errored connections fall back to default music with a
+// message.
 
-import { read, write, type MigrationMap } from '../storage/versioned';
-import { getPref, getTheme, subscribe as subscribeTheme } from '../theme';
-import { createAudioEngine, type AudioEngine, type MusicState } from './engine';
-import { loadManifest, type Track } from './manifest';
+import { mountSpotifyPlayback } from '../integrations/spotify/playback-ui';
+import {
+  getPlayback,
+  subscribePlayback,
+  type PlaybackMode,
+} from '../integrations/spotify/playback';
+import { getTokens, subscribeTokens } from '../integrations/spotify/store';
+import { mountDefaultMusic } from './default-music';
+import type { AudioEngine } from './engine';
 
-interface PersistedMusic {
-  trackId: string | null;
-  volume: number;
-  loop: boolean;
+function shouldUseSpotify(mode: PlaybackMode): boolean {
+  return mode === 'ready' || mode === 'connecting';
 }
 
-const STORAGE_KEY = 'music';
-const STORAGE_VERSION = 1;
-const STORAGE_MIGRATIONS: MigrationMap = {};
+export function mountMusic(target: HTMLElement): void {
+  let defaultUi: { unmount: () => void; engine: AudioEngine } | null = null;
+  let spotifyUi: { unmount: () => void } | null = null;
+  let active: 'default' | 'spotify' | null = null;
 
-function loadPersisted(): Partial<PersistedMusic> {
-  const stored = read<unknown>(STORAGE_KEY, STORAGE_VERSION, STORAGE_MIGRATIONS);
-  if (!stored || typeof stored !== 'object') return {};
-  const v = stored as Record<string, unknown>;
-  const out: Partial<PersistedMusic> = {};
-  if (typeof v.trackId === 'string' || v.trackId === null) out.trackId = v.trackId as string | null;
-  if (typeof v.volume === 'number') out.volume = v.volume;
-  if (typeof v.loop === 'boolean') out.loop = v.loop;
-  return out;
-}
+  function clear(): void {
+    defaultUi?.unmount();
+    defaultUi = null;
+    spotifyUi?.unmount();
+    spotifyUi = null;
+    target.innerHTML = '';
+    target.removeAttribute('data-music-mode');
+  }
 
-function savePersisted(state: MusicState): void {
-  const persisted: PersistedMusic = {
-    trackId: state.trackId,
-    volume: state.volume,
-    loop: state.loop,
-  };
-  write(STORAGE_KEY, STORAGE_VERSION, persisted);
-}
+  function mountTarget(mode: 'default' | 'spotify'): void {
+    if (active === mode) return;
+    clear();
+    if (mode === 'spotify') {
+      spotifyUi = mountSpotifyPlayback(target);
+      target.dataset.musicMode = 'spotify';
+    } else {
+      defaultUi = mountDefaultMusic(target);
+      target.dataset.musicMode = 'default';
+      // Pause default audio if Spotify just took over previously and is
+      // now stepping aside; the engine starts paused, so this is a no-op
+      // on first mount.
+    }
+    active = mode;
+  }
 
-export function mountMusic(target: HTMLElement): AudioEngine {
-  const persisted = loadPersisted();
-  const engine = createAudioEngine({
-    ...(persisted.volume !== undefined ? { volume: persisted.volume } : {}),
-    ...(persisted.loop !== undefined ? { loop: persisted.loop } : {}),
-  });
-
-  target.classList.add('music-card');
-  target.innerHTML = `
-    <header class="music-header">
-      <span class="music-title">Music</span>
-      <button
-        type="button"
-        class="music-loop"
-        data-action="loop"
-        aria-pressed="false"
-        aria-label="Toggle loop"
-        title="Loop"
-      >↻</button>
-    </header>
-    <select class="music-picker" data-slot="picker" aria-label="Track" disabled>
-      <option value="">No tracks</option>
-    </select>
-    <div class="music-now" data-slot="now">—</div>
-    <div class="music-controls">
-      <button
-        type="button"
-        class="music-btn music-btn-primary"
-        data-action="play"
-        aria-label="Play / pause"
-        disabled
-      >▶</button>
-      <input
-        type="range"
-        class="music-volume"
-        data-slot="volume"
-        min="0"
-        max="1"
-        step="0.01"
-        aria-label="Volume"
-      />
-    </div>
-  `;
-
-  const picker = target.querySelector<HTMLSelectElement>('[data-slot="picker"]')!;
-  const playBtn = target.querySelector<HTMLButtonElement>('[data-action="play"]')!;
-  const loopBtn = target.querySelector<HTMLButtonElement>('[data-action="loop"]')!;
-  const volume = target.querySelector<HTMLInputElement>('[data-slot="volume"]')!;
-  const nowEl = target.querySelector<HTMLElement>('[data-slot="now"]')!;
-
-  function renderTracks(tracks: Track[]): void {
-    if (tracks.length === 0) {
-      picker.innerHTML = `<option value="">No tracks — add to public/audio/manifest.json</option>`;
-      picker.disabled = true;
-      playBtn.disabled = true;
-      nowEl.textContent = 'Drop bundled tracks in public/audio/.';
+  function decide(): void {
+    const tokens = getTokens();
+    if (!tokens) {
+      mountTarget('default');
       return;
     }
-    picker.disabled = false;
-    playBtn.disabled = false;
-    const options = ['<option value="">Choose track…</option>']
-      .concat(tracks.map((t) => `<option value="${t.id}">${escapeHtml(t.label)}</option>`))
-      .join('');
-    picker.innerHTML = options;
-  }
-
-  function render(state: MusicState): void {
-    const track = engine.getTracks().find((t) => t.id === state.trackId) ?? null;
-    if (picker.value !== (state.trackId ?? '')) {
-      picker.value = state.trackId ?? '';
-    }
-    nowEl.textContent = track ? track.label : engine.getTracks().length ? 'Pick a track' : nowEl.textContent;
-    playBtn.textContent = state.playing ? '❚❚' : '▶';
-    playBtn.setAttribute('aria-pressed', String(state.playing));
-    playBtn.disabled = engine.getTracks().length === 0 || !state.trackId;
-    loopBtn.setAttribute('aria-pressed', String(state.loop));
-    if (Number(volume.value) !== state.volume) {
-      volume.value = String(state.volume);
-    }
-  }
-
-  picker.addEventListener('change', () => {
-    const id = picker.value;
-    if (!id) return;
-    if (engine.load(id)) {
-      // User explicitly picked — start playing.
-      void engine.play();
-    }
-  });
-
-  playBtn.addEventListener('click', () => {
-    void engine.toggle();
-  });
-
-  loopBtn.addEventListener('click', () => {
-    engine.setLoop(!engine.getState().loop);
-  });
-
-  volume.addEventListener('input', () => {
-    engine.setVolume(volume.valueAsNumber);
-  });
-
-  engine.subscribe((state) => {
-    render(state);
-    savePersisted(state);
-  });
-
-  // Initial render before the manifest resolves so the user sees the
-  // shell rather than an empty card.
-  renderTracks([]);
-  render(engine.getState());
-
-  void loadManifest().then((tracks) => {
-    engine.setTracks(tracks);
-    renderTracks(tracks);
-    if (persisted.trackId && tracks.some((t) => t.id === persisted.trackId)) {
-      engine.load(persisted.trackId);
+    const playback = getPlayback();
+    if (shouldUseSpotify(playback.mode)) {
+      // Pause default music when Spotify takes the slot so the bundled
+      // track and Spotify aren't both audible.
+      defaultUi?.engine.pause();
+      mountTarget('spotify');
     } else {
-      maybeApplyThemeDefault(engine);
+      mountTarget('default');
     }
-    render(engine.getState());
-  });
+  }
 
-  // Theme changes can suggest a default track when the user hasn't
-  // picked one. We never override a user pick — `maybeApplyThemeDefault`
-  // bails if `trackId` is non-null.
-  subscribeTheme(() => maybeApplyThemeDefault(engine));
-
-  // Page Visibility: pause music when the tab hides, resume on focus
-  // only if it was playing before. Settings/UI dispatches that change
-  // `playing` independently keep the flag honest.
-  let wasPlayingBeforeHide = false;
-  document.addEventListener('visibilitychange', () => {
-    const state = engine.getState();
-    if (document.hidden) {
-      wasPlayingBeforeHide = state.playing;
-      if (state.playing) engine.pause();
-    } else if (wasPlayingBeforeHide) {
-      wasPlayingBeforeHide = false;
-      void engine.play();
-    }
-  });
-
-  return engine;
-}
-
-function maybeApplyThemeDefault(engine: AudioEngine): void {
-  const theme = getTheme(getPref().themeId);
-  if (!theme?.defaultTrackId) return;
-  if (engine.getState().trackId !== null) return;
-  if (!engine.getTracks().some((t) => t.id === theme.defaultTrackId)) return;
-  engine.load(theme.defaultTrackId);
-}
-
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+  decide();
+  subscribeTokens(decide);
+  subscribePlayback(decide);
 }

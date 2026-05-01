@@ -904,6 +904,87 @@ h3 {
   accent-color: var(--accent);
 }
 
+.music-header-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.music-icon-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  color: var(--fg-muted);
+  font-size: 11px;
+  display: grid;
+  place-items: center;
+  background: transparent;
+}
+
+.music-icon-btn[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--accent-fg);
+  border-color: var(--accent);
+}
+
+.music-album-art {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.music-album-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.music-scrub-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.music-scrub {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.music-time {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-muted);
+  font-variant-numeric: tabular-nums;
+  min-width: 30px;
+}
+
+.music-controls-spotify {
+  gap: 6px;
+}
+
+.music-controls-spotify .music-volume {
+  flex: 1;
+  margin-left: 6px;
+}
+
+.music-error {
+  font-size: 11px;
+  color: color-mix(in srgb, var(--accent) 70%, var(--fg));
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  border-radius: 6px;
+  padding: 4px 6px;
+}
+
+.music-card-spotify[data-mode='no-premium'] .music-controls,
+.music-card-spotify[data-mode='no-premium'] .music-scrub-row {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
 /* ---------- Toast ---------- */
 .toast-container {
   position: fixed;
