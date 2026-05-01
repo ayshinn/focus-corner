@@ -17,6 +17,7 @@ import { mountMusic } from './audio';
 import { consumeCallback, initSpotifyAuth } from './integrations/spotify';
 import { initGoogleAuth } from './integrations/google';
 import { mountCalendarCard, mountNextEventPill } from './calendar';
+import { installCheatsheetHotkeys } from './hotkeys';
 import { showToast } from './ui/toast';
 
 registerTheme(minimal);
@@ -60,6 +61,7 @@ void consumeCallback().catch((err: unknown) => {
   showToast(err instanceof Error ? err.message : 'Spotify auth failed', { variant: 'warn' });
 });
 initGoogleAuth();
+installCheatsheetHotkeys();
 
 mountBackdrop(main);
 mountSidebar(sidebar);

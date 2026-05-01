@@ -49,7 +49,7 @@ Progress tracker for focus-corner. Steps come from `implementation_steps.md`. Ma
 
 ## Phase 4 — Polish & extras
 
-- [ ] 34. Global hotkey system + cheatsheet
+- [x] 34. Global hotkey system + cheatsheet
 - [ ] 35. Session log widget + stats + CSV export
 - [ ] 36. Sticky notes (schema, render, drag, markdown-lite)
 - [ ] 37. Small widgets (weather, quote/intention, habit tracker)

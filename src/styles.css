@@ -1155,6 +1155,110 @@ h3 {
   border-radius: 4px;
 }
 
+/* ---------- Cheatsheet ---------- */
+.cheatsheet {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+}
+
+.cheatsheet[hidden] {
+  display: none;
+}
+
+.cheatsheet-backdrop {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
+  backdrop-filter: blur(6px);
+}
+
+.cheatsheet-panel {
+  position: relative;
+  width: min(560px, 90vw);
+  max-height: 80vh;
+  overflow: hidden;
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 20px 60px -16px color-mix(in srgb, var(--fg) 40%, transparent);
+  display: flex;
+  flex-direction: column;
+}
+
+.cheatsheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.cheatsheet-header h2 {
+  font-size: 16px;
+}
+
+.cheatsheet-close {
+  font-size: 22px;
+  line-height: 1;
+  color: var(--fg-muted);
+  padding: 0 6px;
+}
+
+.cheatsheet-body {
+  padding: 16px 18px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cheatsheet-section h3 {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fg-muted);
+  margin: 0 0 6px;
+}
+
+.cheatsheet-section ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  row-gap: 4px;
+}
+
+.cheatsheet-section li {
+  display: contents;
+}
+
+.cheatsheet-section li kbd {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 6px;
+  text-align: center;
+  color: var(--fg);
+  align-self: start;
+}
+
+.cheatsheet-section li span {
+  font-size: 12px;
+  color: var(--fg);
+}
+
+.cheatsheet-empty {
+  font-size: 12px;
+  color: var(--fg-muted);
+  font-style: italic;
+}
+
 /* ---------- Toast ---------- */
 .toast-container {
   position: fixed;
