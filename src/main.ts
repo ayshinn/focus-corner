@@ -15,6 +15,8 @@ import { mountPomodoro } from './pomodoro';
 import { mountTodo } from './todo';
 import { mountMusic } from './audio';
 import { consumeCallback, initSpotifyAuth } from './integrations/spotify';
+import { initGoogleAuth } from './integrations/google';
+import { mountCalendarCard, mountNextEventPill } from './calendar';
 import { showToast } from './ui/toast';
 
 registerTheme(minimal);
@@ -33,6 +35,8 @@ const settingsSlot = document.querySelector<HTMLElement>('[data-slot="settings"]
 const pomodoroSlot = document.querySelector<HTMLElement>('[data-slot="pomodoro"]');
 const todoSlot = document.querySelector<HTMLElement>('[data-slot="todo"]');
 const musicSlot = document.querySelector<HTMLElement>('[data-slot="music"]');
+const calendarSlot = document.querySelector<HTMLElement>('[data-slot="calendar"]');
+const nextEventSlot = document.querySelector<HTMLElement>('[data-slot="next-event"]');
 if (
   !sidebar ||
   !drawer ||
@@ -42,7 +46,9 @@ if (
   !settingsSlot ||
   !pomodoroSlot ||
   !todoSlot ||
-  !musicSlot
+  !musicSlot ||
+  !calendarSlot ||
+  !nextEventSlot
 ) {
   throw new Error('shell missing');
 }
@@ -53,6 +59,7 @@ initSpotifyAuth();
 void consumeCallback().catch((err: unknown) => {
   showToast(err instanceof Error ? err.message : 'Spotify auth failed', { variant: 'warn' });
 });
+initGoogleAuth();
 
 mountBackdrop(main);
 mountSidebar(sidebar);
@@ -63,3 +70,5 @@ mountCurrentTask(currentTaskSlot);
 mountPomodoro(pomodoroSlot);
 mountTodo(todoSlot);
 mountMusic(musicSlot);
+mountCalendarCard(calendarSlot);
+mountNextEventPill(nextEventSlot);

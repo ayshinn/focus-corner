@@ -1,5 +1,6 @@
 import { getSettings, subscribeSettings, updateSettings, type ClockFormat } from '../storage/settings';
 import { mountSpotifyConnect } from '../integrations/spotify/ui-connect';
+import { mountGoogleConnect } from '../integrations/google/ui-connect';
 
 const CLOCK_OPTIONS: Array<{ value: ClockFormat; label: string }> = [
   { value: '12h', label: '12-hour' },
@@ -99,6 +100,9 @@ export function mountSettingsControls(target: HTMLElement): void {
     const spotifyRow = document.createElement('div');
     integrationsList.appendChild(spotifyRow);
     mountSpotifyConnect({ target: spotifyRow });
+    const googleRow = document.createElement('div');
+    integrationsList.appendChild(googleRow);
+    mountGoogleConnect({ target: googleRow });
   }
 
   const segmented = target.querySelector<HTMLElement>('[data-slot="clock-format"]');

@@ -4,4 +4,4 @@ Personal aesthetic workspace dashboard — pomodoro, todo, ambient backdrop, mus
 
 See [`productivity_site_spec.md`](./productivity_site_spec.md) for the full design spec and [`implementation_steps.md`](./implementation_steps.md) for the build plan. Progress is tracked in [`todo.md`](./todo.md).
 
-Integration setup notes: [`docs/spotify.md`](./docs/spotify.md).
+Integration setup notes: [`docs/spotify.md`](./docs/spotify.md), [`docs/google-calendar.md`](./docs/google-calendar.md).

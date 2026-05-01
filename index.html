@@ -11,12 +11,16 @@
       <main class="main">
         <header class="topbar">
           <div class="topbar-current-task" data-slot="current-task">No task</div>
-          <div class="topbar-clock" data-slot="clock"></div>
+          <div class="topbar-meta">
+            <div class="topbar-next-event" data-slot="next-event" hidden></div>
+            <div class="topbar-clock" data-slot="clock"></div>
+          </div>
         </header>
         <section class="stage" data-slot="stage">
           <article class="floating-widget floating-widget-todo" data-slot="todo"></article>
           <article class="floating-widget floating-widget-pomodoro" data-slot="pomodoro"></article>
           <article class="floating-widget floating-widget-music" data-slot="music"></article>
+          <article class="floating-widget floating-widget-calendar" data-slot="calendar"></article>
         </section>
       </main>
       <aside class="settings-drawer" aria-label="Settings" data-open="false">
