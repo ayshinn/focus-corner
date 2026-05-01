@@ -302,6 +302,33 @@ h3 {
     linear-gradient(180deg, var(--bg), #050a07);
 }
 
+/* ---- Code Terminal fallback scene ---- */
+[data-theme='code-terminal'] .backdrop::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--accent) 6%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--accent) 6%, transparent) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+[data-theme='code-terminal'][data-variant='night'] .backdrop::before {
+  background-color: var(--bg);
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--accent) 6%, transparent) 0 1px,
+      transparent 1px 3px
+    ),
+    radial-gradient(
+      ellipse at 50% 50%,
+      color-mix(in srgb, var(--accent) 12%, transparent),
+      transparent 65%
+    );
+}
+
 .backdrop[data-paused='true']::before,
 .backdrop[data-paused='true']::after {
   animation-play-state: paused;

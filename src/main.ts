@@ -4,6 +4,7 @@ import { minimal } from './theme/themes/minimal';
 import { cozyDorm } from './theme/themes/cozy-dorm';
 import { library } from './theme/themes/library';
 import { centralPark } from './theme/themes/central-park';
+import { codeTerminal } from './theme/themes/code-terminal';
 import { mountSidebar } from './sidebar';
 import { mountSettingsDrawer } from './ui/settings-drawer';
 import { mountSettingsControls } from './ui/settings-controls';
@@ -17,6 +18,7 @@ registerTheme(minimal);
 registerTheme(cozyDorm);
 registerTheme(library);
 registerTheme(centralPark);
+registerTheme(codeTerminal);
 bootstrapTheme();
 
 const sidebar = document.querySelector<HTMLElement>('.sidebar');
