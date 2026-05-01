@@ -985,6 +985,153 @@ h3 {
   pointer-events: none;
 }
 
+.music-browse {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  max-height: 320px;
+  overflow: hidden;
+}
+
+.music-browse-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.music-tab {
+  flex: 1;
+  padding: 4px 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg-muted);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+}
+
+.music-tab[aria-selected='true'] {
+  color: var(--accent-fg);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.music-browse-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  max-height: 240px;
+}
+
+.music-search-input {
+  width: 100%;
+  padding: 6px 8px;
+  font: inherit;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--fg);
+}
+
+.music-result-group h4 {
+  margin: 4px 0 2px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fg-muted);
+}
+
+.music-result-group ul,
+.music-playlists ul,
+.music-queue-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.music-result {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border-radius: 5px;
+}
+
+.music-result:hover {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.music-result-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.music-result-title {
+  font-size: 12px;
+  color: var(--fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.music-result-sub {
+  font-size: 10px;
+  color: var(--fg-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.music-mini-btn {
+  font-size: 10px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--surface-elevated);
+  color: var(--fg);
+  white-space: nowrap;
+}
+
+.music-mini-btn:hover {
+  background: color-mix(in srgb, var(--accent) 15%, var(--surface-elevated));
+}
+
+.music-empty {
+  font-size: 11px;
+  color: var(--fg-muted);
+  font-style: italic;
+  padding: 4px 0;
+}
+
+.music-queue-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.music-queue-current {
+  font-size: 11px;
+  color: var(--fg);
+  margin-bottom: 4px;
+}
+
+.music-queue-item {
+  display: flex;
+  flex-direction: column;
+  padding: 3px 6px;
+  border-radius: 4px;
+}
+
 /* ---------- Toast ---------- */
 .toast-container {
   position: fixed;

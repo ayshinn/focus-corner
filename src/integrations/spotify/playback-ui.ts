@@ -20,6 +20,19 @@ import {
   type PlaybackSnapshot,
 } from './playback';
 import { getTokens, subscribeTokens } from './store';
+import {
+  addToQueue,
+  clearQueue,
+  getQueue,
+  listMyPlaylists,
+  playContext,
+  search,
+  type QueueSnapshot,
+  type SearchResults,
+  type SimplifiedPlaylist,
+} from './discovery';
+import { installSpotifyHotkeys } from './hotkeys';
+import { SpotifyApiError } from './api';
 
 function fmt(ms: number): string {
   if (!Number.isFinite(ms) || ms < 0) return '0:00';
@@ -71,6 +84,14 @@ export function mountSpotifyPlayback(target: HTMLElement): UiHandles {
         <button
           type="button"
           class="music-icon-btn"
+          data-action="toggle-browse"
+          aria-pressed="false"
+          aria-label="Browse playlists / search / queue"
+          title="Browse"
+        >☰</button>
+        <button
+          type="button"
+          class="music-icon-btn"
           data-action="toggle-art"
           aria-pressed="false"
           aria-label="Toggle album art"
@@ -118,6 +139,33 @@ export function mountSpotifyPlayback(target: HTMLElement): UiHandles {
       />
     </div>
     <div class="music-error" data-slot="error" hidden></div>
+    <div class="music-browse" data-slot="browse" hidden>
+      <div class="music-browse-tabs" role="tablist">
+        <button type="button" class="music-tab" data-tab="search" aria-selected="true">Search</button>
+        <button type="button" class="music-tab" data-tab="playlists" aria-selected="false">Playlists</button>
+        <button type="button" class="music-tab" data-tab="queue" aria-selected="false">Queue</button>
+      </div>
+      <div class="music-browse-pane" data-pane="search">
+        <input
+          type="search"
+          class="music-search-input"
+          data-slot="search-input"
+          placeholder="Search tracks / playlists…"
+          aria-label="Spotify search"
+        />
+        <div class="music-search-results" data-slot="search-results"></div>
+      </div>
+      <div class="music-browse-pane" data-pane="playlists" hidden>
+        <div class="music-playlists" data-slot="playlists"></div>
+      </div>
+      <div class="music-browse-pane" data-pane="queue" hidden>
+        <div class="music-queue-actions">
+          <button type="button" class="music-mini-btn" data-action="queue-refresh">Refresh</button>
+          <button type="button" class="music-mini-btn" data-action="queue-clear">Clear</button>
+        </div>
+        <div class="music-queue" data-slot="queue"></div>
+      </div>
+    </div>
   `;
 
   const artBox = target.querySelector<HTMLElement>('[data-slot="art"]')!;
@@ -132,9 +180,19 @@ export function mountSpotifyPlayback(target: HTMLElement): UiHandles {
   const nextBtn = target.querySelector<HTMLButtonElement>('[data-action="next"]')!;
   const transferBtn = target.querySelector<HTMLButtonElement>('[data-action="transfer"]')!;
   const artBtn = target.querySelector<HTMLButtonElement>('[data-action="toggle-art"]')!;
+  const browseBtn = target.querySelector<HTMLButtonElement>('[data-action="toggle-browse"]')!;
+  const browseEl = target.querySelector<HTMLElement>('[data-slot="browse"]')!;
   const errorEl = target.querySelector<HTMLElement>('[data-slot="error"]')!;
+  const searchInput = target.querySelector<HTMLInputElement>('[data-slot="search-input"]')!;
+  const searchResults = target.querySelector<HTMLElement>('[data-slot="search-results"]')!;
+  const playlistsEl = target.querySelector<HTMLElement>('[data-slot="playlists"]')!;
+  const queueEl = target.querySelector<HTMLElement>('[data-slot="queue"]')!;
 
   let scrubbing = false;
+  let browseOpen = false;
+  let activeTab: 'search' | 'playlists' | 'queue' = 'search';
+  let playlistsLoaded = false;
+  let searchToken = 0;
 
   function render(snap: PlaybackSnapshot): void {
     target.dataset.mode = snap.mode;
@@ -175,6 +233,212 @@ export function mountSpotifyPlayback(target: HTMLElement): UiHandles {
   nextBtn.addEventListener('click', () => void next());
   transferBtn.addEventListener('click', () => void transferToThisDevice(true));
   artBtn.addEventListener('click', () => setShowAlbumArt(!getPlayback().showAlbumArt));
+  browseBtn.addEventListener('click', () => {
+    browseOpen = !browseOpen;
+    browseEl.hidden = !browseOpen;
+    browseBtn.setAttribute('aria-pressed', String(browseOpen));
+    if (browseOpen) void loadActiveTab();
+  });
+
+  function setTab(tab: 'search' | 'playlists' | 'queue'): void {
+    activeTab = tab;
+    target.querySelectorAll<HTMLElement>('[data-tab]').forEach((el) => {
+      el.setAttribute('aria-selected', String(el.dataset.tab === tab));
+    });
+    target.querySelectorAll<HTMLElement>('[data-pane]').forEach((el) => {
+      el.hidden = el.dataset.pane !== tab;
+    });
+    void loadActiveTab();
+  }
+
+  async function loadActiveTab(): Promise<void> {
+    if (activeTab === 'playlists' && !playlistsLoaded) await refreshPlaylists();
+    if (activeTab === 'queue') await refreshQueue();
+  }
+
+  target.querySelector('.music-browse-tabs')?.addEventListener('click', (event) => {
+    const btn = (event.target as HTMLElement).closest<HTMLElement>('[data-tab]');
+    const tab = btn?.dataset.tab as 'search' | 'playlists' | 'queue' | undefined;
+    if (tab) setTab(tab);
+  });
+
+  let searchTimer: number | null = null;
+  searchInput.addEventListener('input', () => {
+    if (searchTimer !== null) window.clearTimeout(searchTimer);
+    const term = searchInput.value;
+    searchTimer = window.setTimeout(() => void runSearch(term), 250);
+  });
+
+  async function runSearch(term: string): Promise<void> {
+    const myToken = ++searchToken;
+    if (!term.trim()) {
+      searchResults.innerHTML = '';
+      return;
+    }
+    try {
+      const results = await search(term);
+      if (myToken !== searchToken) return;
+      renderSearch(results);
+    } catch (err) {
+      if (myToken !== searchToken) return;
+      searchResults.innerHTML = `<div class="music-empty">${escapeHtml(failureMessage(err))}</div>`;
+    }
+  }
+
+  function renderSearch(results: SearchResults): void {
+    if (results.tracks.length === 0 && results.playlists.length === 0) {
+      searchResults.innerHTML = `<div class="music-empty">No matches.</div>`;
+      return;
+    }
+    const trackHtml = results.tracks
+      .map(
+        (t) => `
+        <li class="music-result" data-track-uri="${escapeHtml(t.uri)}">
+          <div class="music-result-main">
+            <span class="music-result-title">${escapeHtml(t.name)}</span>
+            <span class="music-result-sub">${escapeHtml(t.artists)} — ${escapeHtml(t.album)}</span>
+          </div>
+          <button type="button" class="music-mini-btn" data-action="queue-track" data-uri="${escapeHtml(t.uri)}" aria-label="Queue ${escapeHtml(t.name)}">+ Queue</button>
+        </li>`,
+      )
+      .join('');
+    const playlistHtml = results.playlists
+      .map(
+        (p) => `
+        <li class="music-result" data-playlist-uri="${escapeHtml(p.uri)}">
+          <div class="music-result-main">
+            <span class="music-result-title">${escapeHtml(p.name)}</span>
+            <span class="music-result-sub">${escapeHtml(p.ownerName)} · ${p.trackCount} tracks</span>
+          </div>
+          <button type="button" class="music-mini-btn" data-action="play-playlist" data-uri="${escapeHtml(p.uri)}">Play</button>
+        </li>`,
+      )
+      .join('');
+    searchResults.innerHTML = `
+      ${results.tracks.length ? `<div class="music-result-group"><h4>Tracks</h4><ul>${trackHtml}</ul></div>` : ''}
+      ${results.playlists.length ? `<div class="music-result-group"><h4>Playlists</h4><ul>${playlistHtml}</ul></div>` : ''}
+    `;
+  }
+
+  searchResults.addEventListener('click', (event) => {
+    const btn = (event.target as HTMLElement).closest<HTMLElement>('[data-action]');
+    if (!btn) return;
+    const uri = btn.dataset.uri;
+    if (!uri) return;
+    const action = btn.dataset.action;
+    if (action === 'queue-track') {
+      void addToQueue(uri).catch((err: unknown) => surfaceFailure(err));
+    } else if (action === 'play-playlist') {
+      void playContext(uri, getPlayback().deviceId ?? undefined).catch((err: unknown) =>
+        surfaceFailure(err),
+      );
+    }
+  });
+
+  async function refreshPlaylists(): Promise<void> {
+    playlistsEl.innerHTML = `<div class="music-empty">Loading…</div>`;
+    try {
+      const playlists = await listMyPlaylists();
+      renderPlaylists(playlists);
+      playlistsLoaded = true;
+    } catch (err) {
+      playlistsEl.innerHTML = `<div class="music-empty">${escapeHtml(failureMessage(err))}</div>`;
+    }
+  }
+
+  function renderPlaylists(playlists: SimplifiedPlaylist[]): void {
+    if (playlists.length === 0) {
+      playlistsEl.innerHTML = `<div class="music-empty">No playlists found.</div>`;
+      return;
+    }
+    playlistsEl.innerHTML = `
+      <ul>
+        ${playlists
+          .map(
+            (p) => `
+          <li class="music-result">
+            <div class="music-result-main">
+              <span class="music-result-title">${escapeHtml(p.name)}</span>
+              <span class="music-result-sub">${p.trackCount} tracks</span>
+            </div>
+            <button type="button" class="music-mini-btn" data-action="play-playlist" data-uri="${escapeHtml(p.uri)}">Play</button>
+          </li>`,
+          )
+          .join('')}
+      </ul>
+    `;
+  }
+
+  playlistsEl.addEventListener('click', (event) => {
+    const btn = (event.target as HTMLElement).closest<HTMLElement>('[data-action="play-playlist"]');
+    const uri = btn?.dataset.uri;
+    if (uri) {
+      void playContext(uri, getPlayback().deviceId ?? undefined).catch((err: unknown) =>
+        surfaceFailure(err),
+      );
+    }
+  });
+
+  async function refreshQueue(): Promise<void> {
+    queueEl.innerHTML = `<div class="music-empty">Loading…</div>`;
+    try {
+      const snap = await getQueue();
+      renderQueue(snap);
+    } catch (err) {
+      queueEl.innerHTML = `<div class="music-empty">${escapeHtml(failureMessage(err))}</div>`;
+    }
+  }
+
+  function renderQueue(snap: QueueSnapshot): void {
+    if (!snap.current && snap.upcoming.length === 0) {
+      queueEl.innerHTML = `<div class="music-empty">Queue empty.</div>`;
+      return;
+    }
+    const upcomingHtml = snap.upcoming
+      .map(
+        (q) => `
+        <li class="music-queue-item">
+          <span class="music-result-title">${escapeHtml(q.name)}</span>
+          <span class="music-result-sub">${escapeHtml(q.artists)}</span>
+        </li>`,
+      )
+      .join('');
+    queueEl.innerHTML = `
+      ${
+        snap.current
+          ? `<div class="music-queue-current">Now: <strong>${escapeHtml(snap.current.name)}</strong> — ${escapeHtml(snap.current.artists)}</div>`
+          : ''
+      }
+      ${snap.upcoming.length ? `<ul class="music-queue-list">${upcomingHtml}</ul>` : '<div class="music-empty">No upcoming items.</div>'}
+    `;
+  }
+
+  target.querySelector('[data-action="queue-refresh"]')?.addEventListener('click', () => {
+    void refreshQueue();
+  });
+  target.querySelector('[data-action="queue-clear"]')?.addEventListener('click', () => {
+    void clearQueue(getPlayback().deviceId ?? undefined)
+      .then(() => refreshQueue())
+      .catch((err: unknown) => surfaceFailure(err));
+  });
+
+  function failureMessage(err: unknown): string {
+    if (err instanceof SpotifyApiError) {
+      if (err.status === 403) return 'Forbidden — check allowlist / scopes.';
+      if (err.status === 401) return 'Session expired — reconnect.';
+      if (err.status === 404)
+        return 'No active Spotify device. Use ⇄ to transfer playback here.';
+      return err.message;
+    }
+    if (err instanceof Error) return err.message;
+    return 'Spotify error';
+  }
+
+  function surfaceFailure(err: unknown): void {
+    const message = failureMessage(err);
+    errorEl.hidden = false;
+    errorEl.textContent = message;
+  }
 
   scrubEl.addEventListener('pointerdown', () => {
     scrubbing = true;
@@ -199,11 +463,13 @@ export function mountSpotifyPlayback(target: HTMLElement): UiHandles {
 
   if (getTokens()) void ensurePlayer();
   render(getPlayback());
+  const uninstallHotkeys = installSpotifyHotkeys();
 
   return {
     unmount(): void {
       unsubPlayback();
       unsubTokens();
+      uninstallHotkeys();
       destroyPlayer();
       target.classList.remove('music-card-spotify');
       target.removeAttribute('data-mode');
