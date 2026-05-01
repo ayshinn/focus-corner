@@ -25,4 +25,15 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    files: ['scripts/**/*.{js,mjs}'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+    rules: {
+      'no-useless-assignment': 'off',
+    },
+  },
 );

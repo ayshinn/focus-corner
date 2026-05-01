@@ -20,11 +20,20 @@ export const TOKEN_NAMES = {
 export type TokenKey = keyof typeof TOKEN_NAMES;
 export type TokenValues = Record<TokenKey, string>;
 
+// Backdrop configuration. CSS-only themes render via theme-scoped rules
+// in styles.css; video themes mount a <video> element on top of those
+// rules so a missing/erroring asset gracefully falls back to the CSS
+// scene.
+export type BackdropConfig =
+  | { type: 'css' }
+  | { type: 'video'; day: string; night: string };
+
 export interface Theme {
   id: string;
   label: string;
   day: TokenValues;
   night: TokenValues;
+  backdrop?: BackdropConfig;
 }
 
 export type ThemeVariant = 'day' | 'night' | 'auto';

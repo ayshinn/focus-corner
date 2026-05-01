@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "node scripts/check-backdrop-budget.mjs",
     "build": "tsc --noEmit && vite build",
+    "check:backdrop-budget": "node scripts/check-backdrop-budget.mjs",
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",

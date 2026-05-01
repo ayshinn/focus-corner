@@ -27,11 +27,11 @@ Progress tracker for focus-corner. Steps come from `implementation_steps.md`. Ma
 - [x] 18. Todo logic + persistence
 - [x] 19. Todo basic UI (render, add, done, edit, current task wiring)
 - [x] 20. Todo time + drag (auto-clear, midnight roll, drag within + between)
-- [ ] 21. MVP smoke pass + bug commit
+- [x] 21. MVP smoke pass + bug commit
 
 ## Phase 2 — Themes + default music
 
-- [ ] 22. Backdrop video infrastructure + asset budget guardrail
+- [x] 22. Backdrop video infrastructure + asset budget guardrail
 - [ ] 23. Cozy Dorm theme (day + night)
 - [ ] 24. Library theme (day + night)
 - [ ] 25. Central Park theme (day + night)

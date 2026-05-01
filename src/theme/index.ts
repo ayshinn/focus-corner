@@ -73,7 +73,10 @@ function setupSystemListener(): void {
   if (currentPref.variant !== 'auto') return;
   if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
   const mq = window.matchMedia('(prefers-color-scheme: dark)');
-  const handler = (): void => applyTheme(currentPref.themeId, 'auto');
+  const handler = (): void => {
+    applyTheme(currentPref.themeId, 'auto');
+    notify();
+  };
   mq.addEventListener('change', handler);
   unlistenSystem = () => mq.removeEventListener('change', handler);
 }

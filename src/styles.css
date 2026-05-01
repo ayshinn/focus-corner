@@ -118,6 +118,19 @@ h3 {
   overflow: hidden;
 }
 
+.backdrop-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.backdrop[data-video-error='true'] .backdrop-video {
+  display: none;
+}
+
 [data-theme='minimal'] .backdrop::before,
 [data-theme='minimal'] .backdrop::after {
   content: '';
