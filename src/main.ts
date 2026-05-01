@@ -13,6 +13,7 @@ import { mountClock } from './clock';
 import { mountCurrentTask } from './current-task';
 import { mountPomodoro } from './pomodoro';
 import { mountTodo } from './todo';
+import { mountMusic } from './audio';
 
 registerTheme(minimal);
 registerTheme(cozyDorm);
@@ -29,6 +30,7 @@ const currentTaskSlot = document.querySelector<HTMLElement>('[data-slot="current
 const settingsSlot = document.querySelector<HTMLElement>('[data-slot="settings"]');
 const pomodoroSlot = document.querySelector<HTMLElement>('[data-slot="pomodoro"]');
 const todoSlot = document.querySelector<HTMLElement>('[data-slot="todo"]');
+const musicSlot = document.querySelector<HTMLElement>('[data-slot="music"]');
 if (
   !sidebar ||
   !drawer ||
@@ -37,7 +39,8 @@ if (
   !currentTaskSlot ||
   !settingsSlot ||
   !pomodoroSlot ||
-  !todoSlot
+  !todoSlot ||
+  !musicSlot
 ) {
   throw new Error('shell missing');
 }
@@ -50,3 +53,4 @@ mountClock(clockSlot);
 mountCurrentTask(currentTaskSlot);
 mountPomodoro(pomodoroSlot);
 mountTodo(todoSlot);
+mountMusic(musicSlot);
