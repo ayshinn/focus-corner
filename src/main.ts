@@ -2,6 +2,7 @@ import './styles.css';
 import { bootstrapTheme, registerTheme } from './theme';
 import { minimal } from './theme/themes/minimal';
 import { cozyDorm } from './theme/themes/cozy-dorm';
+import { library } from './theme/themes/library';
 import { mountSidebar } from './sidebar';
 import { mountSettingsDrawer } from './ui/settings-drawer';
 import { mountSettingsControls } from './ui/settings-controls';
@@ -13,6 +14,7 @@ import { mountTodo } from './todo';
 
 registerTheme(minimal);
 registerTheme(cozyDorm);
+registerTheme(library);
 bootstrapTheme();
 
 const sidebar = document.querySelector<HTMLElement>('.sidebar');

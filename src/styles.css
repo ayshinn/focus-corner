@@ -224,6 +224,45 @@ h3 {
     linear-gradient(180deg, var(--bg), #0d0a07);
 }
 
+/* ---- Library fallback scene ---- */
+[data-theme='library'] .backdrop::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse at 18% 28%,
+      color-mix(in srgb, var(--accent) 24%, transparent),
+      transparent 55%
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 80px,
+      color-mix(in srgb, var(--accent) 5%, transparent) 80px 81px
+    ),
+    linear-gradient(180deg, var(--bg), color-mix(in srgb, var(--bg) 85%, var(--accent) 15%));
+}
+
+[data-theme='library'][data-variant='night'] .backdrop::before {
+  background:
+    radial-gradient(
+      circle at 50% 80%,
+      color-mix(in srgb, var(--accent) 38%, transparent),
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 15% 25%,
+      color-mix(in srgb, var(--accent) 14%, transparent),
+      transparent 45%
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 70px,
+      color-mix(in srgb, var(--accent) 6%, transparent) 70px 71px
+    ),
+    linear-gradient(180deg, var(--bg), #060403);
+}
+
 .backdrop[data-paused='true']::before,
 .backdrop[data-paused='true']::after {
   animation-play-state: paused;
