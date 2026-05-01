@@ -14,6 +14,8 @@ import { mountCurrentTask } from './current-task';
 import { mountPomodoro } from './pomodoro';
 import { mountTodo } from './todo';
 import { mountMusic } from './audio';
+import { consumeCallback, initSpotifyAuth } from './integrations/spotify';
+import { showToast } from './ui/toast';
 
 registerTheme(minimal);
 registerTheme(cozyDorm);
@@ -44,6 +46,13 @@ if (
 ) {
   throw new Error('shell missing');
 }
+
+// Spotify boot: hydrate persisted tokens (schedules silent refresh) and
+// consume any ?code= params left after an OAuth redirect.
+initSpotifyAuth();
+void consumeCallback().catch((err: unknown) => {
+  showToast(err instanceof Error ? err.message : 'Spotify auth failed', { variant: 'warn' });
+});
 
 mountBackdrop(main);
 mountSidebar(sidebar);

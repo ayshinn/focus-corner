@@ -1,4 +1,5 @@
 import { getSettings, subscribeSettings, updateSettings, type ClockFormat } from '../storage/settings';
+import { mountSpotifyConnect } from '../integrations/spotify/ui-connect';
 
 const CLOCK_OPTIONS: Array<{ value: ClockFormat; label: string }> = [
   { value: '12h', label: '12-hour' },
@@ -87,7 +88,18 @@ export function mountSettingsControls(target: HTMLElement): void {
         })}
       </div>
     </section>
+    <section class="settings-section">
+      <h3>Integrations</h3>
+      <div class="integration-list" data-slot="integrations"></div>
+    </section>
   `;
+
+  const integrationsList = target.querySelector<HTMLElement>('[data-slot="integrations"]');
+  if (integrationsList) {
+    const spotifyRow = document.createElement('div');
+    integrationsList.appendChild(spotifyRow);
+    mountSpotifyConnect({ target: spotifyRow });
+  }
 
   const segmented = target.querySelector<HTMLElement>('[data-slot="clock-format"]');
   segmented?.addEventListener('click', (event) => {

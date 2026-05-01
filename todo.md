@@ -41,7 +41,7 @@ Progress tracker for focus-corner. Steps come from `implementation_steps.md`. Ma
 
 ## Phase 3 — Integrations
 
-- [ ] 29. Spotify auth (PKCE, token storage + refresh, dev-app docs)
+- [x] 29. Spotify auth (PKCE, token storage + refresh, dev-app docs)
 - [ ] 30. Spotify playback core (SDK, custom UI, transfer device, album art)
 - [ ] 31. Spotify discovery + polish (playlist, search, queue, hotkeys, failure modes)
 - [ ] 32. Calendar auth + today view + next-event countdown
