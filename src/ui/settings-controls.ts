@@ -18,6 +18,32 @@ function clamp(n: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, Math.floor(n)));
 }
 
+interface StepperOpts {
+  min: number;
+  max: number;
+  ariaLabel: string;
+  dataAttr: string;
+  dataValue: string;
+}
+
+function stepperHtml(opts: StepperOpts): string {
+  return `
+    <div class="settings-stepper">
+      <button type="button" class="settings-stepper-btn" data-step="-1" aria-label="Decrease ${opts.ariaLabel}" tabindex="-1">−</button>
+      <input
+        class="settings-stepper-input"
+        type="number"
+        min="${opts.min}"
+        max="${opts.max}"
+        step="1"
+        ${opts.dataAttr}="${opts.dataValue}"
+        aria-label="${opts.ariaLabel}"
+      />
+      <button type="button" class="settings-stepper-btn" data-step="1" aria-label="Increase ${opts.ariaLabel}" tabindex="-1">+</button>
+    </div>
+  `;
+}
+
 export function mountSettingsControls(target: HTMLElement): void {
   target.innerHTML = `
     <section class="settings-section">
@@ -38,14 +64,13 @@ export function mountSettingsControls(target: HTMLElement): void {
         (f) => `
         <div class="settings-row">
           <span class="settings-label">${f.label}</span>
-          <input
-            class="settings-number"
-            type="number"
-            min="${f.min}"
-            max="${f.max}"
-            step="1"
-            data-duration="${f.key}"
-          />
+          ${stepperHtml({
+            min: f.min,
+            max: f.max,
+            ariaLabel: `${f.label} duration in minutes`,
+            dataAttr: 'data-duration',
+            dataValue: f.key,
+          })}
         </div>`,
       ).join('')}
     </section>
@@ -53,14 +78,13 @@ export function mountSettingsControls(target: HTMLElement): void {
       <h3>Todo</h3>
       <div class="settings-row">
         <span class="settings-label">Clear done after (hours)</span>
-        <input
-          class="settings-number"
-          type="number"
-          min="1"
-          max="720"
-          step="1"
-          data-todo-clear="hours"
-        />
+        ${stepperHtml({
+          min: 1,
+          max: 720,
+          ariaLabel: 'Clear done after hours',
+          dataAttr: 'data-todo-clear',
+          dataValue: 'hours',
+        })}
       </div>
     </section>
   `;
@@ -89,6 +113,21 @@ export function mountSettingsControls(target: HTMLElement): void {
   todoClearInput?.addEventListener('change', () => {
     const next = clamp(todoClearInput.valueAsNumber, 1, 720);
     updateSettings({ todoDoneClearAfterHours: next });
+  });
+
+  // Stepper +/- buttons: nudge the sibling input and trigger its change
+  // handler so the existing clamp/persist logic runs unchanged.
+  target.addEventListener('click', (event) => {
+    const btn = (event.target as HTMLElement).closest<HTMLElement>('.settings-stepper-btn');
+    if (!btn) return;
+    const input = btn.parentElement?.querySelector<HTMLInputElement>('.settings-stepper-input');
+    if (!input) return;
+    const delta = btn.dataset.step === '-1' ? -1 : 1;
+    const min = Number(input.min);
+    const max = Number(input.max);
+    const current = Number.isFinite(input.valueAsNumber) ? input.valueAsNumber : min;
+    input.value = String(clamp(current + delta, min, max));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
   });
 
   const sync = (): void => {
