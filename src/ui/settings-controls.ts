@@ -1,6 +1,7 @@
 import { getSettings, subscribeSettings, updateSettings, type ClockFormat } from '../storage/settings';
 import { mountSpotifyConnect } from '../integrations/spotify/ui-connect';
 import { mountGoogleConnect } from '../integrations/google/ui-connect';
+import { mountStats } from '../stats';
 
 const CLOCK_OPTIONS: Array<{ value: ClockFormat; label: string }> = [
   { value: '12h', label: '12-hour' },
@@ -93,6 +94,10 @@ export function mountSettingsControls(target: HTMLElement): void {
       <h3>Integrations</h3>
       <div class="integration-list" data-slot="integrations"></div>
     </section>
+    <section class="settings-section">
+      <h3>Focus stats</h3>
+      <div data-slot="stats"></div>
+    </section>
   `;
 
   const integrationsList = target.querySelector<HTMLElement>('[data-slot="integrations"]');
@@ -104,6 +109,9 @@ export function mountSettingsControls(target: HTMLElement): void {
     integrationsList.appendChild(googleRow);
     mountGoogleConnect({ target: googleRow });
   }
+
+  const statsSlot = target.querySelector<HTMLElement>('[data-slot="stats"]');
+  if (statsSlot) mountStats(statsSlot);
 
   const segmented = target.querySelector<HTMLElement>('[data-slot="clock-format"]');
   segmented?.addEventListener('click', (event) => {
