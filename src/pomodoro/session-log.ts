@@ -3,10 +3,9 @@
 // (step 35) reads them. Schema v1 — ridiculously small surface so the
 // future widget can derive whatever it needs.
 
-import { openDb, requestToPromise } from '../storage/idb';
+import { requestToPromise } from '../storage/idb';
+import { getDb } from '../storage/db';
 
-const DB_NAME = 'focus-corner';
-const DB_VERSION = 1;
 const STORE = 'sessions';
 
 export interface SessionRecord {
@@ -14,29 +13,6 @@ export interface SessionRecord {
   endedAt: number;
   durationMs: number;
   kind: 'work';
-}
-
-let dbPromise: Promise<IDBDatabase> | null = null;
-
-function getDb(): Promise<IDBDatabase> {
-  if (!dbPromise) {
-    dbPromise = openDb({
-      name: DB_NAME,
-      version: DB_VERSION,
-      stores: [
-        {
-          name: STORE,
-          options: { keyPath: 'id', autoIncrement: true },
-          indexes: [{ name: 'by-startedAt', keyPath: 'startedAt' }],
-        },
-      ],
-    }).catch((err) => {
-      // Surface once for debugging; subsequent calls re-attempt next page load.
-      dbPromise = null;
-      throw err;
-    });
-  }
-  return dbPromise;
 }
 
 export async function appendSession(record: SessionRecord): Promise<void> {

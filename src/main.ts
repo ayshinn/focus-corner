@@ -17,6 +17,7 @@ import { mountMusic } from './audio';
 import { consumeCallback, initSpotifyAuth } from './integrations/spotify';
 import { initGoogleAuth } from './integrations/google';
 import { mountCalendarCard, mountNextEventPill } from './calendar';
+import { mountStickyNotes } from './sticky-notes';
 import { installCheatsheetHotkeys } from './hotkeys';
 import { showToast } from './ui/toast';
 
@@ -74,3 +75,6 @@ mountTodo(todoSlot);
 mountMusic(musicSlot);
 mountCalendarCard(calendarSlot);
 mountNextEventPill(nextEventSlot);
+
+const stage = document.querySelector<HTMLElement>('.stage');
+if (stage) mountStickyNotes(stage);
