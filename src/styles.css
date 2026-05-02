@@ -125,6 +125,69 @@ h3 {
   font-style: italic;
 }
 
+.topbar-weather {
+  font-size: 12px;
+  color: var(--fg-muted);
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-elevated) 70%, transparent);
+  white-space: nowrap;
+}
+
+.topbar-weather[data-state='empty'] {
+  font-style: italic;
+}
+
+.topbar-intention {
+  font-size: 12px;
+  color: var(--fg-muted);
+  font-style: italic;
+  flex: 1;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.topbar-intention .intention-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 460px;
+  cursor: pointer;
+}
+
+.topbar-intention .intention-text[data-empty='true'] {
+  opacity: 0.6;
+}
+
+.topbar-intention .intention-edit {
+  font-size: 11px;
+  color: var(--fg-muted);
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+.topbar-intention .intention-edit:hover {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--fg);
+}
+
+.topbar-intention .intention-input {
+  width: min(460px, 60%);
+  font: inherit;
+  font-size: 12px;
+  font-style: italic;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--fg);
+  padding: 4px 8px;
+}
+
 .stage {
   flex: 1;
   position: relative;
@@ -1436,6 +1499,114 @@ h3 {
 
 .toast[data-variant='warn'] {
   border-color: color-mix(in srgb, var(--accent) 60%, var(--border));
+}
+
+/* ---------- Habits ---------- */
+.habits-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.habits-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.habits-empty {
+  font-size: 12px;
+  color: var(--fg-muted);
+  font-style: italic;
+}
+
+.habits-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.habits-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.habits-check input {
+  accent-color: var(--accent);
+}
+
+.habits-grid {
+  display: flex;
+  gap: 2px;
+}
+
+.habits-cell {
+  width: 6px;
+  height: 12px;
+  border-radius: 1px;
+  background: color-mix(in srgb, var(--fg) 8%, transparent);
+}
+
+.habits-cell.on {
+  background: var(--accent);
+}
+
+.habits-delete {
+  font-size: 14px;
+  color: var(--fg-muted);
+  padding: 0 4px;
+}
+
+.habits-delete:hover {
+  color: color-mix(in srgb, var(--accent) 80%, var(--fg));
+}
+
+.habits-add {
+  display: flex;
+  gap: 6px;
+}
+
+.habits-add input {
+  flex: 1;
+  padding: 6px 8px;
+  font: inherit;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--fg);
+}
+
+.habits-add button {
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-fg);
+}
+
+.settings-text-input {
+  flex: 1;
+  padding: 5px 8px;
+  font: inherit;
+  font-size: 13px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--fg);
 }
 
 /* ---------- Stats ---------- */

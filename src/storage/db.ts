@@ -8,7 +8,8 @@ import { openDb, type DbSpec } from './idb';
 export const DB_NAME = 'focus-corner';
 // v1: sessions (Step 17)
 // v2: sticky_notes (Step 36)
-export const DB_VERSION = 2;
+// v3: habits (Step 37)
+export const DB_VERSION = 3;
 
 const STORES: DbSpec['stores'] = [
   {
@@ -20,6 +21,10 @@ const STORES: DbSpec['stores'] = [
     name: 'sticky_notes',
     options: { keyPath: 'id' },
     indexes: [{ name: 'by-updatedAt', keyPath: 'updatedAt' }],
+  },
+  {
+    name: 'habits',
+    options: { keyPath: 'id' },
   },
 ];
 

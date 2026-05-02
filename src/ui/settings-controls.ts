@@ -1,7 +1,14 @@
-import { getSettings, subscribeSettings, updateSettings, type ClockFormat } from '../storage/settings';
+import {
+  getSettings,
+  subscribeSettings,
+  updateSettings,
+  type ClockFormat,
+  type IntentionMode,
+} from '../storage/settings';
 import { mountSpotifyConnect } from '../integrations/spotify/ui-connect';
 import { mountGoogleConnect } from '../integrations/google/ui-connect';
 import { mountStats } from '../stats';
+import { mountHabits } from '../habits';
 
 const CLOCK_OPTIONS: Array<{ value: ClockFormat; label: string }> = [
   { value: '12h', label: '12-hour' },
@@ -95,6 +102,34 @@ export function mountSettingsControls(target: HTMLElement): void {
       <div class="integration-list" data-slot="integrations"></div>
     </section>
     <section class="settings-section">
+      <h3>Intention</h3>
+      <div class="settings-row">
+        <span class="settings-label">Source</span>
+        <div class="settings-segmented" data-slot="intention-mode">
+          <button type="button" data-value="daily-quote" aria-pressed="false">Quote</button>
+          <button type="button" data-value="user-intention" aria-pressed="false">Mine</button>
+        </div>
+      </div>
+    </section>
+    <section class="settings-section">
+      <h3>Weather</h3>
+      <div class="settings-row">
+        <span class="settings-label">Source</span>
+        <div class="settings-segmented" data-slot="weather-mode">
+          <button type="button" data-value="auto" aria-pressed="false">Auto</button>
+          <button type="button" data-value="manual" aria-pressed="false">City</button>
+        </div>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">City</span>
+        <input type="text" class="settings-text-input" data-slot="weather-city" placeholder="e.g. Brooklyn, NY" />
+      </div>
+    </section>
+    <section class="settings-section">
+      <h3>Habits</h3>
+      <div data-slot="habits"></div>
+    </section>
+    <section class="settings-section">
       <h3>Focus stats</h3>
       <div data-slot="stats"></div>
     </section>
@@ -112,6 +147,40 @@ export function mountSettingsControls(target: HTMLElement): void {
 
   const statsSlot = target.querySelector<HTMLElement>('[data-slot="stats"]');
   if (statsSlot) mountStats(statsSlot);
+
+  const habitsSlot = target.querySelector<HTMLElement>('[data-slot="habits"]');
+  if (habitsSlot) mountHabits(habitsSlot);
+
+  const intentionMode = target.querySelector<HTMLElement>('[data-slot="intention-mode"]');
+  intentionMode?.addEventListener('click', (event) => {
+    const btn = (event.target as HTMLElement).closest<HTMLElement>('[data-value]');
+    const value = btn?.dataset.value as IntentionMode | undefined;
+    if (value) {
+      updateSettings({ intention: { ...getSettings().intention, mode: value } });
+    }
+  });
+
+  const weatherMode = target.querySelector<HTMLElement>('[data-slot="weather-mode"]');
+  weatherMode?.addEventListener('click', (event) => {
+    const btn = (event.target as HTMLElement).closest<HTMLElement>('[data-value]');
+    const value = btn?.dataset.value as 'auto' | 'manual' | undefined;
+    if (value) updateSettings({ weather: { ...getSettings().weather, mode: value } });
+  });
+
+  const weatherCity = target.querySelector<HTMLInputElement>('[data-slot="weather-city"]');
+  weatherCity?.addEventListener('change', () => {
+    const city = weatherCity.value.trim();
+    const next = { ...getSettings().weather };
+    if (city) {
+      next.city = city;
+      // Clear cached coords; geocode runs on next refresh.
+      delete next.lat;
+      delete next.lon;
+    } else {
+      delete next.city;
+    }
+    updateSettings({ weather: next });
+  });
 
   const segmented = target.querySelector<HTMLElement>('[data-slot="clock-format"]');
   segmented?.addEventListener('click', (event) => {
@@ -156,15 +225,30 @@ export function mountSettingsControls(target: HTMLElement): void {
 
   const sync = (): void => {
     const settings = getSettings();
-    target.querySelectorAll<HTMLElement>('[data-value]').forEach((el) => {
-      el.setAttribute('aria-pressed', String(el.dataset.value === settings.clockFormat));
-    });
+    target
+      .querySelectorAll<HTMLElement>('[data-slot="clock-format"] [data-value]')
+      .forEach((el) => {
+        el.setAttribute('aria-pressed', String(el.dataset.value === settings.clockFormat));
+      });
+    target
+      .querySelectorAll<HTMLElement>('[data-slot="intention-mode"] [data-value]')
+      .forEach((el) => {
+        el.setAttribute('aria-pressed', String(el.dataset.value === settings.intention.mode));
+      });
+    target
+      .querySelectorAll<HTMLElement>('[data-slot="weather-mode"] [data-value]')
+      .forEach((el) => {
+        el.setAttribute('aria-pressed', String(el.dataset.value === settings.weather.mode));
+      });
     target.querySelectorAll<HTMLInputElement>('[data-duration]').forEach((input) => {
       const key = input.dataset.duration as DurationKey;
       input.value = String(settings.pomodoroDurationsMin[key]);
     });
     if (todoClearInput) {
       todoClearInput.value = String(settings.todoDoneClearAfterHours);
+    }
+    if (weatherCity) {
+      weatherCity.value = settings.weather.city ?? '';
     }
   };
 

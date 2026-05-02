@@ -5,6 +5,7 @@
 import { read, write, type MigrationMap } from './versioned';
 
 export type ClockFormat = '12h' | '24h';
+export type IntentionMode = 'daily-quote' | 'user-intention';
 
 export interface PomodoroDurationsMin {
   work: number;
@@ -12,14 +13,30 @@ export interface PomodoroDurationsMin {
   longBreak: number;
 }
 
+export interface WeatherSettings {
+  mode: 'auto' | 'manual';
+  city?: string;
+  lat?: number;
+  lon?: number;
+}
+
+export interface IntentionSettings {
+  mode: IntentionMode;
+  // User-typed intention keyed by YYYY-MM-DD. Only the most recent is
+  // shown; older keys are kept until export/import does the cleanup.
+  byDate: Record<string, string>;
+}
+
 export interface Settings {
   clockFormat: ClockFormat;
   pomodoroDurationsMin: PomodoroDurationsMin;
   todoDoneClearAfterHours: number;
+  weather: WeatherSettings;
+  intention: IntentionSettings;
 }
 
 const KEY = 'settings';
-const VERSION = 3;
+const VERSION = 4;
 
 const DEFAULT_POMODORO: PomodoroDurationsMin = {
   work: 25,
@@ -29,10 +46,15 @@ const DEFAULT_POMODORO: PomodoroDurationsMin = {
 
 const DEFAULT_TODO_DONE_CLEAR_HOURS = 24;
 
+const DEFAULT_WEATHER: WeatherSettings = { mode: 'auto' };
+const DEFAULT_INTENTION: IntentionSettings = { mode: 'daily-quote', byDate: {} };
+
 const DEFAULTS: Settings = {
   clockFormat: '12h',
   pomodoroDurationsMin: { ...DEFAULT_POMODORO },
   todoDoneClearAfterHours: DEFAULT_TODO_DONE_CLEAR_HOURS,
+  weather: { ...DEFAULT_WEATHER },
+  intention: { ...DEFAULT_INTENTION, byDate: {} },
 };
 
 const MIGRATIONS: MigrationMap = {
@@ -43,6 +65,11 @@ const MIGRATIONS: MigrationMap = {
   2: (prev) => ({
     ...(prev as Record<string, unknown>),
     todoDoneClearAfterHours: DEFAULT_TODO_DONE_CLEAR_HOURS,
+  }),
+  3: (prev) => ({
+    ...(prev as Record<string, unknown>),
+    weather: { ...DEFAULT_WEATHER },
+    intention: { ...DEFAULT_INTENTION, byDate: {} },
   }),
 };
 
@@ -60,6 +87,15 @@ function normalize(stored: Partial<Settings>): Settings {
       typeof stored.todoDoneClearAfterHours === 'number' && stored.todoDoneClearAfterHours > 0
         ? stored.todoDoneClearAfterHours
         : DEFAULT_TODO_DONE_CLEAR_HOURS,
+    weather: {
+      ...DEFAULT_WEATHER,
+      ...(stored.weather ?? {}),
+    },
+    intention: {
+      ...DEFAULT_INTENTION,
+      ...(stored.intention ?? {}),
+      byDate: { ...(stored.intention?.byDate ?? {}) },
+    },
   };
 }
 

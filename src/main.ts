@@ -18,6 +18,8 @@ import { consumeCallback, initSpotifyAuth } from './integrations/spotify';
 import { initGoogleAuth } from './integrations/google';
 import { mountCalendarCard, mountNextEventPill } from './calendar';
 import { mountStickyNotes } from './sticky-notes';
+import { mountWeatherPill } from './weather';
+import { mountIntention } from './intention';
 import { installCheatsheetHotkeys } from './hotkeys';
 import { showToast } from './ui/toast';
 
@@ -39,6 +41,8 @@ const todoSlot = document.querySelector<HTMLElement>('[data-slot="todo"]');
 const musicSlot = document.querySelector<HTMLElement>('[data-slot="music"]');
 const calendarSlot = document.querySelector<HTMLElement>('[data-slot="calendar"]');
 const nextEventSlot = document.querySelector<HTMLElement>('[data-slot="next-event"]');
+const weatherSlot = document.querySelector<HTMLElement>('[data-slot="weather"]');
+const intentionSlot = document.querySelector<HTMLElement>('[data-slot="intention"]');
 if (
   !sidebar ||
   !drawer ||
@@ -50,7 +54,9 @@ if (
   !todoSlot ||
   !musicSlot ||
   !calendarSlot ||
-  !nextEventSlot
+  !nextEventSlot ||
+  !weatherSlot ||
+  !intentionSlot
 ) {
   throw new Error('shell missing');
 }
@@ -75,6 +81,8 @@ mountTodo(todoSlot);
 mountMusic(musicSlot);
 mountCalendarCard(calendarSlot);
 mountNextEventPill(nextEventSlot);
+mountWeatherPill(weatherSlot);
+mountIntention(intentionSlot);
 
 const stage = document.querySelector<HTMLElement>('.stage');
 if (stage) mountStickyNotes(stage);
