@@ -54,7 +54,7 @@ Progress tracker for focus-corner. Steps come from `implementation_steps.md`. Ma
 - [x] 36. Sticky notes (schema, render, drag, markdown-lite)
 - [x] 37. Small widgets (weather, quote/intention, habit tracker)
 - [x] 38. Focus mode + PWA + export/import JSON
-- [ ] 39. DOM / integration tests
+- [x] 39. DOM / integration tests
 
 ## Phase 5 — Speculative
 
