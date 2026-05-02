@@ -9,6 +9,8 @@ import { mountSpotifyConnect } from '../integrations/spotify/ui-connect';
 import { mountGoogleConnect } from '../integrations/google/ui-connect';
 import { mountStats } from '../stats';
 import { mountHabits } from '../habits';
+import { downloadBackup, importBackup, pickJsonFile } from '../backup';
+import { showToast } from './toast';
 
 const CLOCK_OPTIONS: Array<{ value: ClockFormat; label: string }> = [
   { value: '12h', label: '12-hour' },
@@ -133,7 +135,33 @@ export function mountSettingsControls(target: HTMLElement): void {
       <h3>Focus stats</h3>
       <div data-slot="stats"></div>
     </section>
+    <section class="settings-section">
+      <h3>Backup</h3>
+      <div class="settings-row">
+        <button type="button" class="stats-export" data-action="backup-export">Export JSON</button>
+        <button type="button" class="stats-refresh" data-action="backup-import">Import JSON…</button>
+      </div>
+      <div class="settings-hint">OAuth tokens are excluded — reconnect Spotify / Google after import.</div>
+    </section>
   `;
+
+  target
+    .querySelector<HTMLButtonElement>('[data-action="backup-export"]')
+    ?.addEventListener('click', () => {
+      void downloadBackup().catch((err: unknown) =>
+        showToast(err instanceof Error ? err.message : 'Export failed', { variant: 'warn' }),
+      );
+    });
+  target
+    .querySelector<HTMLButtonElement>('[data-action="backup-import"]')
+    ?.addEventListener('click', () => {
+      void (async (): Promise<void> => {
+        const text = await pickJsonFile();
+        if (!text) return;
+        const result = await importBackup(text);
+        showToast(result.message, { variant: result.ok ? 'info' : 'warn' });
+      })();
+    });
 
   const integrationsList = target.querySelector<HTMLElement>('[data-slot="integrations"]');
   if (integrationsList) {

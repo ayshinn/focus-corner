@@ -2,6 +2,7 @@ import { getPref, listThemes, setTheme, setVariant, subscribe } from '../theme';
 import type { ThemeVariant } from '../theme/tokens';
 import { gearIcon } from '../ui/icons';
 import { toggleSettings } from '../ui/settings-drawer';
+import { isFocusMode, toggleFocusMode } from '../focus-mode';
 
 const VARIANTS: Array<{ id: ThemeVariant; label: string }> = [
   { id: 'day', label: 'Day' },
@@ -18,6 +19,14 @@ export function mountSidebar(target: HTMLElement): void {
       ).join('')}
     </div>
     <div class="sidebar-spacer"></div>
+    <button
+      type="button"
+      class="gear-button focus-button"
+      data-action="toggle-focus"
+      aria-label="Toggle focus mode"
+      aria-pressed="false"
+      title="Focus mode (F)"
+    >◌</button>
     <button type="button" class="gear-button" data-action="open-settings" aria-label="Settings">
       ${gearIcon}
     </button>
@@ -46,6 +55,14 @@ export function mountSidebar(target: HTMLElement): void {
   target.querySelector('[data-action="open-settings"]')?.addEventListener('click', () => {
     toggleSettings();
   });
+
+  const focusBtn = target.querySelector<HTMLButtonElement>('[data-action="toggle-focus"]');
+  focusBtn?.addEventListener('click', () => {
+    toggleFocusMode();
+    focusBtn.setAttribute('aria-pressed', String(isFocusMode()));
+  });
+  // Sync initial pressed state in case focus mode hydrated from storage.
+  focusBtn?.setAttribute('aria-pressed', String(isFocusMode()));
 
   const sync = (): void => {
     const pref = getPref();

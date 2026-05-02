@@ -590,6 +590,52 @@ h3 {
   color: var(--accent-fg);
 }
 
+.settings-hint {
+  font-size: 11px;
+  color: var(--fg-muted);
+  font-style: italic;
+}
+
+/* ---------- Focus mode ---------- */
+.focus-button[aria-pressed='true'] {
+  color: var(--accent-fg);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+[data-focus-mode='true'] .floating-widget-todo,
+[data-focus-mode='true'] .floating-widget-music,
+[data-focus-mode='true'] .floating-widget-calendar,
+[data-focus-mode='true'] .topbar-current-task,
+[data-focus-mode='true'] .topbar-intention,
+[data-focus-mode='true'] .topbar-next-event,
+[data-focus-mode='true'] .topbar-weather,
+[data-focus-mode='true'] .sticky-layer,
+[data-focus-mode='true'] .settings-drawer {
+  display: none !important;
+}
+
+[data-focus-mode='true'] .sidebar {
+  background: transparent;
+  border-right: 0;
+  pointer-events: auto;
+}
+
+[data-focus-mode='true'] .sidebar > *:not([data-action='toggle-focus']) {
+  display: none;
+}
+
+[data-focus-mode='true'] .topbar {
+  justify-content: flex-end;
+  background: transparent;
+}
+
+[data-focus-mode='true'] .floating-widget-pomodoro {
+  top: 50%;
+  right: 50%;
+  transform: translate(50%, -50%);
+}
+
 /* ---------- Floating widgets ---------- */
 .floating-widget {
   position: absolute;

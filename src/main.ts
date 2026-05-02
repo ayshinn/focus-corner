@@ -21,6 +21,7 @@ import { mountStickyNotes } from './sticky-notes';
 import { mountWeatherPill } from './weather';
 import { mountIntention } from './intention';
 import { installCheatsheetHotkeys } from './hotkeys';
+import { initFocusMode } from './focus-mode';
 import { showToast } from './ui/toast';
 
 registerTheme(minimal);
@@ -69,6 +70,19 @@ void consumeCallback().catch((err: unknown) => {
 });
 initGoogleAuth();
 installCheatsheetHotkeys();
+initFocusMode();
+
+// Service worker for offline shell + audio + backdrop runtime cache.
+// Errors are non-fatal — the app works without it.
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    void navigator.serviceWorker
+      .register(`${import.meta.env.BASE_URL}sw.js`, { scope: import.meta.env.BASE_URL })
+      .catch(() => {
+        /* SW registration failed; app continues without offline support. */
+      });
+  });
+}
 
 mountBackdrop(main);
 mountSidebar(sidebar);
