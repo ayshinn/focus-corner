@@ -15,7 +15,11 @@ import { mountDefaultMusic } from './default-music';
 import type { AudioEngine } from './engine';
 
 function shouldUseSpotify(mode: PlaybackMode): boolean {
-  return mode === 'ready' || mode === 'connecting';
+  // Spotify UI owns the slot for any mode except the explicit fall-back
+  // states. `inactive` is the initial mode before the SDK boots; mounting
+  // the Spotify UI is what triggers `ensurePlayer()` and flips the mode
+  // forward, so we must not gate on `connecting`/`ready` here.
+  return mode !== 'no-premium' && mode !== 'error';
 }
 
 export function mountMusic(target: HTMLElement): void {
